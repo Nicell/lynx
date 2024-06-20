@@ -1,4 +1,4 @@
-local Lynx = require("src/lynx")
+local Lynx = require("src")
 
 local app = Lynx.new()
 
