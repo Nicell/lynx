@@ -1,0 +1,2 @@
+[tools]
+lune = { source = "filiptibell/lune", version = "0.8.5" }
