@@ -54,6 +54,26 @@ app:use(function(c, next)
 end)
 ```
 
+### HTML
+
+HTML responses are supported.
+
+```lua
+app:get("/html", function(c)
+  return c:html("<h1>Hello, Lynx!</h1>")
+end)
+```
+
+### Serve Static Files
+
+Static files can be served with `app:static`.
+
+```lua
+app:static("/static", "public")
+-- GET /static
+-- > Serves the file at public/index.html
+```
+
 ### Redirects
 
 Redirects are supported.

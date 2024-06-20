@@ -62,6 +62,11 @@ function Context:json(json: any, status: number?, headers: any?): net.ServeRespo
 	return self:body(body, status, headers)
 end
 
+function Context:html(html: string, status: number?, headers: any?): net.ServeResponse
+  self:header("Content-Type", "text/html")
+  return self:body(html, status, headers)
+end
+
 function Context:notFound(): net.ServeResponse
 	self:status(404)
 	return self:text("Not Found")

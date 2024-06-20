@@ -32,4 +32,12 @@ app:post("/receive", function(c)
   return c:text("Got message: " .. c.req.body)
 end)
 
+-- Send HTML response
+app:get("/html", function(c)
+  return c:html("<h1>Hello, Lynx!</h1>")
+end)
+
+-- Serve static files
+app:static("/static", "public")
+
 app:serve()

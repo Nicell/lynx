@@ -1,6 +1,7 @@
 local net = require("@lune/net")
 local Router = require("router")
 local Context = require("context")
+local static = require("static")
 
 type Context = Context.Context
 export type Handler = (c: Context) -> ()
@@ -53,6 +54,10 @@ end
 
 function Lynx:patch(path: string, handler: Handler)
 	self:addRoute("PATCH", path, handler)
+end
+
+function Lynx:static(path: string, directory: string)
+  self:get(path:gsub("/$", "") .. "/*", static(path, directory))
 end
 
 function Lynx:notFound(context: Context): net.ServeResponse
