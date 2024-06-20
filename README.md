@@ -62,6 +62,8 @@ HTML responses are supported.
 app:get("/html", function(c)
   return c:html("<h1>Hello, Lynx!</h1>")
 end)
+-- GET /html
+-- > <h1>Hello, Lynx!</h1>
 ```
 
 ### Serve Static Files

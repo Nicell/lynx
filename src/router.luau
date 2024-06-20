@@ -33,7 +33,7 @@ function Router:match(method: string, path: string)
 		table.insert(handlers, { params = s.params or {}, handler = s.handler })
 	end
 
-  return handlers
+	return handlers
 end
 
 return Router
