@@ -5,7 +5,7 @@ Context.__index = Context
 export type LynxRequest = net.ServeRequest & { params: { [string]: string } }
 export type Context = typeof(setmetatable({} :: { req: LynxRequest, res: net.ServeResponse }, Context))
 
-function Context.new(req: net.ServeRequest, notFoundHandler: () -> ()?)
+function Context.new(req: net.ServeRequest, notFoundHandler)
 	local self = setmetatable({}, Context)
 	self.req = req
 	self.res = {

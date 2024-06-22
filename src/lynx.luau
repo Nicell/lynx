@@ -4,9 +4,9 @@ local Context = require("context")
 local static = require("static")
 
 type Context = Context.Context
-export type Handler = (c: Context) -> ()
+export type Handler = (c: Context) -> net.ServeResponse
 export type Middleware = (c: Context, next: () -> ()) -> ()
-export type MatchResponse = { { params: { [string]: string }, handler: Handler | Middleware } }
+export type MatchResponse = { { params: { [string]: string }, handler: Handler | Middleware, score: number } }
 
 local Lynx = {}
 Lynx.__index = Lynx
@@ -19,12 +19,13 @@ function Lynx.new()
 	self.notFoundHandler = function(c: Context): net.ServeResponse
 		c:status(404)
 		return c:text("Not Found")
-	end
+	end :: Handler
 	return self
 end
 
-function Lynx:addRoute(method: string, path: string, handler: () -> ())
+function Lynx:addRoute(method: string, path: string, handler: Handler | Middleware)
 	self.router:add(method, path, handler)
+	return self
 end
 
 function Lynx:use(path: string | Middleware, handler: Middleware?)
@@ -38,42 +39,44 @@ function Lynx:use(path: string | Middleware, handler: Middleware?)
 	end
 
 	self.router:add("ALL", realPath, handler)
+	return self
 end
 
 function Lynx:on(method: string, path: string, handler: Handler)
-	self:addRoute(method, path, handler)
+	return self:addRoute(method, path, handler)
 end
 
 function Lynx:all(path: string, handler: Handler)
-	self:on("ALL", path, handler)
+	return self:on("ALL", path, handler)
 end
 
 function Lynx:get(path: string, handler: Handler)
-	self:on("GET", path, handler)
+	return self:on("GET", path, handler)
 end
 
 function Lynx:post(path: string, handler: Handler)
-	self:on("POST", path, handler)
+	return self:on("POST", path, handler)
 end
 
 function Lynx:put(path: string, handler: Handler)
-	self:on("PUT", path, handler)
+	return self:on("PUT", path, handler)
 end
 
 function Lynx:delete(path: string, handler: Handler)
-	self:on("DELETE", path, handler)
+	return self:on("DELETE", path, handler)
 end
 
 function Lynx:patch(path: string, handler: Handler)
-	self:on("PATCH", path, handler)
+	return self:on("PATCH", path, handler)
 end
 
 function Lynx:static(path: string, directory: string)
-	self:get(path:gsub("/$", "") .. "/*", static(path, directory))
+	return self:get(path:gsub("/$", "") .. "/*", static(path, directory))
 end
 
 function Lynx:notFound(handler: Handler)
 	self.notFoundHandler = handler
+	return self
 end
 
 function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
@@ -118,6 +121,7 @@ function Lynx:serve(port: number?)
 	self.server = net.serve(port or 3000, function(req)
 		return self:dispatch(req)
 	end)
+	return self
 end
 
 return Lynx
