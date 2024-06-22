@@ -2,7 +2,7 @@
 
 Lynx is a simple and fast Luau web framework for Lune. Lynx is inspired by [Hono](https://github.com/honojs/hono) and shares a similar API.
 
-```lua
+```luau
 local app = Lynx.new()
 
 app:get('/', function(c)
@@ -18,7 +18,7 @@ app:serve()
 
 Route parameters and query parameters are supported.
 
-```lua
+```luau
 app:get("/hello/:name", function(c)
 	local name = c.req.params.name
 	local last = c.req.query.last
@@ -32,7 +32,7 @@ end)
 
 JSON responses are supported.
 
-```lua
+```luau
 app:get("/json", function(c)
 	return c:json({ message = { "this", "is", "json!" } })
 end)
@@ -44,7 +44,7 @@ end)
 
 Middleware can be easily added with `app:use`.
 
-```lua
+```luau
 -- Adds a response time header to every request
 app:use(function(c, next)
 	local start = os.clock()
@@ -58,7 +58,7 @@ end)
 
 HTML responses are supported.
 
-```lua
+```luau
 app:get("/html", function(c)
 	return c:html("<h1>Hello, Lynx!</h1>")
 end)
@@ -70,7 +70,7 @@ end)
 
 Static files can be served with `app:static`.
 
-```lua
+```luau
 app:static("/static", "public")
 -- GET /static
 -- > Serves the file at public/index.html
@@ -80,7 +80,7 @@ app:static("/static", "public")
 
 Redirects are supported.
 
-```lua
+```luau
 app:get("/jason", function(c)
 	return c:redirect("/json")
 end)
@@ -92,7 +92,7 @@ end)
 
 Post requests (and all other HTTP methods) are supported.
 
-```lua
+```luau
 app:post("/receive", function(c)
 	return c:text("Got message: " .. c.req.body)
 end)
