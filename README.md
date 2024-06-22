@@ -100,6 +100,35 @@ end)
 -- > Got message: Hello, Lynx!
 ```
 
+### Custom 404
+
+A custom 404 page can be set with `app:notFound`.
+
+```luau
+app:notFound(function(c)
+	return c:text(`🔍 {c.req.method} {c.req.path} Not found`, 404)
+end)
+-- GET /notfound
+-- > 🔍 GET /notfound Not found
+```
+
+### Grouping
+
+Routes can be defined in a sub-app and then routed on the main app.
+
+```luau
+-- Route a sub-app
+local api = Lynx.new()
+
+api:get("/hello", function(c)
+	return c:text("Hello, API!")
+end)
+
+app:route("/api", api)
+-- GET /api/hello
+-- > Hello, API!
+```
+
 ## Implementation Details
 
 Lynx currently uses a radix tree for routing. This is a simple and efficient way to match routes.

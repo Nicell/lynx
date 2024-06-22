@@ -45,4 +45,13 @@ app:notFound(function(c)
 	return c:text(`🔍 {c.req.method} {c.req.path} Not found`, 404)
 end)
 
+-- Route a sub-app
+local api = Lynx.new()
+
+api:get("/hello", function(c)
+	return c:text("Hello, API!")
+end)
+
+app:route("/api", api)
+
 app:serve()

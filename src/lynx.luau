@@ -13,18 +13,29 @@ Lynx.__index = Lynx
 
 export type Lynx = typeof(Lynx)
 
+local defaultNotFound: Handler = function(c: Context): net.ServeResponse
+	c:status(404)
+	return c:text("Not Found")
+end
+
 function Lynx.new()
 	local self = setmetatable({}, Lynx)
 	self.router = Router.new()
-	self.notFoundHandler = function(c: Context): net.ServeResponse
-		c:status(404)
-		return c:text("Not Found")
-	end :: Handler
+	self.routes = {}
+	self.notFoundHandler = defaultNotFound
+	return self
+end
+
+function Lynx:route(path: string, app: Lynx)
+	for _, route in app.routes do
+		self:addRoute(route.method, path .. route.path, route.handler)
+	end
 	return self
 end
 
 function Lynx:addRoute(method: string, path: string, handler: Handler | Middleware)
 	self.router:add(method, path, handler)
+	table.insert(self.routes, { method = method, path = path, handler = handler })
 	return self
 end
 
