@@ -51,7 +51,7 @@ function Context:body(body: buffer | string, status: number?, headers: any?): ne
 end
 
 function Context:text(text: string, status: number?, headers: any?): net.ServeResponse
-	self:header("Content-Type", "text/plain")
+	self:header("Content-Type", "text/plain; charset=utf-8")
 	return self:body(text, status, headers)
 end
 
@@ -63,7 +63,7 @@ function Context:json(json: any, status: number?, headers: any?): net.ServeRespo
 end
 
 function Context:html(html: string, status: number?, headers: any?): net.ServeResponse
-	self:header("Content-Type", "text/html")
+	self:header("Content-Type", "text/html; charset=utf-8")
 	return self:body(html, status, headers)
 end
 

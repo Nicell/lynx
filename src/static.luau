@@ -87,7 +87,11 @@ local function getMimeType(file: string): string
 	local extension = file:match("^.+(%..+)$")
 	if extension then
 		extension = extension:sub(2):lower() -- Remove the dot and convert to lowercase
-		return mimeTypes[extension] or "application/octet-stream"
+		local mimeType = mimeTypes[extension]
+		if mimeType and mimeType:find("^text") ~= nil then
+			mimeType = mimeType .. "; charset=utf-8"
+		end
+		return mimeType or "application/octet-stream"
 	end
 	return "application/octet-stream" -- Default MIME type
 end
