@@ -95,6 +95,10 @@ function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
 
 	local context = Context.new(req, self.notFoundHandler)
 
+	if not match then
+		return self.notFoundHandler(context)
+	end
+
 	if #match == 1 then
 		local handler = match[1].handler
 		context.req.params = match[1].params
