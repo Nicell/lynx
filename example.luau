@@ -40,4 +40,9 @@ end)
 -- Serve static files
 app:static("/static", "public")
 
+-- 404 handler
+app:notFound(function(c)
+  return c:text(`🔍 {c.req.method} {c.req.path} Not found`, 404)
+end)
+
 app:serve()

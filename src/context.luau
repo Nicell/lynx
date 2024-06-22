@@ -5,13 +5,14 @@ Context.__index = Context
 export type LynxRequest = net.ServeRequest & { params: { [string]: string } }
 export type Context = typeof(setmetatable({} :: { req: LynxRequest, res: net.ServeResponse }, Context))
 
-function Context.new(req: net.ServeRequest)
+function Context.new(req: net.ServeRequest, notFoundHandler: () -> ()?)
 	local self = setmetatable({}, Context)
 	self.req = req
 	self.res = {
 		headers = {},
 	}
 	self.state = {}
+	self.notFoundHandler = notFoundHandler
 	self.finalized = false
 	return self
 end
@@ -68,8 +69,7 @@ function Context:html(html: string, status: number?, headers: any?): net.ServeRe
 end
 
 function Context:notFound(): net.ServeResponse
-	self:status(404)
-	return self:text("Not Found")
+	return self.notFoundHandler(self)
 end
 
 function Context:redirect(location, status: number?)

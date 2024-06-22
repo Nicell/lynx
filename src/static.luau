@@ -111,7 +111,7 @@ local function static(path: string, directory: string)
 				c:header("Content-Type", getMimeType(indexFilePath))
 				return c:body(indexResult)
 			end
-			return c:text("Not Found", 404)
+			return c:notFound()
 		end
 
 		c:header("Content-Type", getMimeType(filePath))

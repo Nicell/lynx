@@ -16,6 +16,10 @@ export type Lynx = typeof(Lynx)
 function Lynx.new()
 	local self = setmetatable({}, Lynx)
 	self.router = Router.new()
+	self.notFoundHandler = function(c: Context): net.ServeResponse
+		c:status(404)
+		return c:text("Not Found")
+	end
 	return self
 end
 
@@ -68,29 +72,28 @@ function Lynx:static(path: string, directory: string)
 	self:get(path:gsub("/$", "") .. "/*", static(path, directory))
 end
 
-function Lynx:notFound(context: Context): net.ServeResponse
-	context:status(404)
-	return context:text("Not Found")
+function Lynx:notFound(handler: Handler)
+	self.notFoundHandler = handler
 end
 
 function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
 	local match: MatchResponse = self.router:match(req.method, req.path)
 
-	local context = Context.new(req)
+	local context = Context.new(req, self.notFoundHandler)
 
 	if #match == 1 then
 		local handler = match[1].handler
 		context.req.params = match[1].params
 		local success, result = pcall(handler, context)
 		if not success then
-			return self:notFound(context)
+			return self.notFoundHandler(context)
 		end
 		return result
 	end
 
 	local function dispatch(i)
 		if i > #match then
-			return self:notFound(context)
+			return self.notFoundHandler(context)
 		end
 
 		context.req.params = match[i].params
@@ -107,7 +110,7 @@ function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
 	if context.finalized then
 		return context.res
 	else
-		return self:notFound(context)
+		return self.notFoundHandler(context)
 	end
 end
 
