@@ -73,24 +73,18 @@ function Node:getHandlers(method: string, params: { [string]: string }?)
 	end
 	if self.wildcard then
 		if self.wildcard.methods[method] then
-			table.insert(
-				handlers,
-				{
-					params = params,
-					handler = self.wildcard.methods[method].handler,
-					score = self.wildcard.methods[method].score,
-				}
-			)
+			table.insert(handlers, {
+				params = params,
+				handler = self.wildcard.methods[method].handler,
+				score = self.wildcard.methods[method].score,
+			})
 		end
 		if self.wildcard.methods["ALL"] then
-			table.insert(
-				handlers,
-				{
-					params = params,
-					handler = self.wildcard.methods["ALL"].handler,
-					score = self.wildcard.methods["ALL"].score,
-				}
-			)
+			table.insert(handlers, {
+				params = params,
+				handler = self.wildcard.methods["ALL"].handler,
+				score = self.wildcard.methods["ALL"].score,
+			})
 		end
 	end
 	return handlers
@@ -126,7 +120,15 @@ function Node:search(
 	end
 
 	if self.wildcard then
-		local wildcardHandlers = self.wildcard:search(method, {}, depth + 1, params)
+		local wildcardHandlers = self.wildcard:search(method, parts, depth + 1, params)
+		if depth + 1 <= #parts then -- Search is still ongoing, check for direct wildcard handlers
+			local directHandlers = self:getHandlers(method, params)
+			if wildcardHandlers then
+				table.move(directHandlers, 1, #directHandlers, #wildcardHandlers + 1, wildcardHandlers)
+			else
+				wildcardHandlers = directHandlers
+			end
+		end
 		if handlers then
 			table.move(wildcardHandlers, 1, #wildcardHandlers, #handlers + 1, handlers)
 		else

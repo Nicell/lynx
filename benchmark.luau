@@ -18,69 +18,69 @@ router:add("GET", "/very/deeply/nested/route/hello/there", function() end)
 router:add("GET", "/static/*", function() end)
 
 local routes = {
-  {
-    name = 'short static',
-    method = 'GET',
-    path = '/user',
-  },
-  {
-    name = 'static with same radix',
-    method = 'GET',
-    path = '/user/comments',
-  },
-  {
-    name = 'dynamic route',
-    method = 'GET',
-    path = '/user/lookup/username/hey',
-  },
-  {
-    name = 'mixed static dynamic',
-    method = 'GET',
-    path = '/event/abcd1234/comments',
-  },
-  {
-    name = 'post',
-    method = 'POST',
-    path = '/event/abcd1234/comment',
-  },
-  {
-    name = 'long static',
-    method = 'GET',
-    path = '/very/deeply/nested/route/hello/there',
-  },
-  {
-    name = 'wildcard',
-    method = 'GET',
-    path = '/static/index.html',
-  },
+	{
+		name = "short static",
+		method = "GET",
+		path = "/user",
+	},
+	{
+		name = "static with same radix",
+		method = "GET",
+		path = "/user/comments",
+	},
+	{
+		name = "dynamic route",
+		method = "GET",
+		path = "/user/lookup/username/hey",
+	},
+	{
+		name = "mixed static dynamic",
+		method = "GET",
+		path = "/event/abcd1234/comments",
+	},
+	{
+		name = "post",
+		method = "POST",
+		path = "/event/abcd1234/comment",
+	},
+	{
+		name = "long static",
+		method = "GET",
+		path = "/very/deeply/nested/route/hello/there",
+	},
+	{
+		name = "wildcard",
+		method = "GET",
+		path = "/static/index.html",
+	},
 }
 
 local ITERATIONS = 100000
 
 for _, route in routes do
-  local total = 0
-  for _ = 1, ITERATIONS do
-    local start = os.clock()
-    router:match(route.method, route.path)
-    local finish = os.clock()
-    total += finish - start
-  end
+	local total = 0
+	for _ = 1, ITERATIONS do
+		local start = os.clock()
+		router:match(route.method, route.path)
+		local finish = os.clock()
+		total += finish - start
+	end
 
-  local average = total / ITERATIONS
-  local averageNs = average * 1e9
+	local average = total / ITERATIONS
+	local averageNs = average * 1e9
 
-  print(route.name, math.ceil(averageNs), "ns")
+	print(route.name, math.ceil(averageNs), "ns")
 end
 
 local totalTogether = 0
 
 for _ = 1, ITERATIONS do
 	local start = os.clock()
-  for _, route in routes do
-    router:match(route.method, route.path)
-  end
+	for _, route in routes do
+		router:match(route.method, route.path)
+	end
 	local finish = os.clock()
-  totalTogether += finish - start
+	totalTogether += finish - start
 end
 
 local average = totalTogether / ITERATIONS
