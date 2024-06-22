@@ -16,21 +16,14 @@ function Router:add(method: string, path: string, handler: () -> ())
 end
 
 function Router:match(method: string, path: string)
-	local parts = path:split("/")
-	if parts[1] == "" then
-		table.remove(parts, 1)
-	end
+	local parts = path:sub(2):split("/")
 
-	local search = self.node:search(method, parts)
+	local handlers = self.node:search(method, parts, 1)
 
-	table.sort(search, function(a, b)
-		return a.score < b.score
-	end)
-
-	local handlers = {}
-
-	for _, s in search do
-		table.insert(handlers, { params = s.params or {}, handler = s.handler })
+	if handlers then
+		table.sort(handlers, function(a, b)
+			return a.score < b.score
+		end)
 	end
 
 	return handlers

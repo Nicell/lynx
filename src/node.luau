@@ -56,70 +56,82 @@ function Node:insert(method: string, path: string, handler: () -> ())
 	currentNode.name = path
 end
 
+function Node:getHandlers(method: string, params: { [string]: string }?)
+	local handlers = {}
+
+	if self.methods[method] then
+		table.insert(
+			handlers,
+			{ params = params, handler = self.methods[method].handler, score = self.methods[method].score }
+		)
+	end
+	if self.methods["ALL"] then
+		table.insert(
+			handlers,
+			{ params = params, handler = self.methods["ALL"].handler, score = self.methods["ALL"].score }
+		)
+	end
+	if self.wildcard then
+		if self.wildcard.methods[method] then
+			table.insert(
+				handlers,
+				{
+					params = params,
+					handler = self.wildcard.methods[method].handler,
+					score = self.wildcard.methods[method].score,
+				}
+			)
+		end
+		if self.wildcard.methods["ALL"] then
+			table.insert(
+				handlers,
+				{
+					params = params,
+					handler = self.wildcard.methods["ALL"].handler,
+					score = self.wildcard.methods["ALL"].score,
+				}
+			)
+		end
+	end
+	return handlers
+end
+
 function Node:search(
 	method: string,
 	parts: { string },
+	depth: number,
 	params: { [string]: string }?
 ): { { params: { [string]: string }?, handler: () -> (), score: number } }
-	local handlers = {}
-
-	local p = parts[1]
+	local p = parts[depth]
 
 	if p == nil then
-		if self.methods[method] then
-			table.insert(
-				handlers,
-				{ params = params, handler = self.methods[method].handler, score = self.methods[method].score }
-			)
-		end
-		if self.methods["ALL"] then
-			table.insert(
-				handlers,
-				{ params = params, handler = self.methods["ALL"].handler, score = self.methods["ALL"].score }
-			)
-		end
-		if self.wildcard then
-			if self.wildcard.methods[method] then
-				table.insert(
-					handlers,
-					{
-						params = params,
-						handler = self.wildcard.methods[method].handler,
-						score = self.wildcard.methods[method].score,
-					}
-				)
-			elseif self.wildcard.methods["ALL"] then
-				table.insert(
-					handlers,
-					{
-						params = params,
-						handler = self.wildcard.methods["ALL"].handler,
-						score = self.wildcard.methods["ALL"].score,
-					}
-				)
-			end
-		end
-		return handlers
+		return self:getHandlers(method, params)
 	end
 
-	local nextParts = {}
-	table.move(parts, 2, #parts, 1, nextParts)
+	local handlers = nil
 
 	if self.children[p] then
-		local childHandlers = self.children[p]:search(method, nextParts, params)
-		table.move(childHandlers, 1, #childHandlers, #handlers + 1, handlers)
+		handlers = self.children[p]:search(method, parts, depth + 1, params)
 	end
 
 	for param, node in self.params do
 		local newParams = if params then table.clone(params) else {}
 		newParams[param] = p
-		local childHandlers = node:search(method, nextParts, newParams)
-		table.move(childHandlers, 1, #childHandlers, #handlers + 1, handlers)
+		local paramHandlers = node:search(method, parts, depth + 1, newParams)
+		if handlers then
+			table.move(paramHandlers, 1, #paramHandlers, #handlers + 1, handlers)
+		else
+			handlers = paramHandlers
+		end
 	end
 
 	if self.wildcard then
-		local wildcardHandlers = self.wildcard:search(method, {}, params)
-		table.move(wildcardHandlers, 1, #wildcardHandlers, #handlers + 1, handlers)
+		local wildcardHandlers = self.wildcard:search(method, {}, depth + 1, params)
+		if handlers then
+			table.move(wildcardHandlers, 1, #wildcardHandlers, #handlers + 1, handlers)
+		else
+			handlers = wildcardHandlers
+		end
 	end
 
 	return handlers
