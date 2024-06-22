@@ -36,24 +36,32 @@ function Lynx:use(path: string | Middleware, handler: Middleware?)
 	self.router:add("ALL", realPath, handler)
 end
 
+function Lynx:on(method: string, path: string, handler: Handler)
+	self:addRoute(method, path, handler)
+end
+
+function Lynx:all(path: string, handler: Handler)
+	self:on("ALL", path, handler)
+end
+
 function Lynx:get(path: string, handler: Handler)
-	self:addRoute("GET", path, handler)
+	self:on("GET", path, handler)
 end
 
 function Lynx:post(path: string, handler: Handler)
-	self:addRoute("POST", path, handler)
+	self:on("POST", path, handler)
 end
 
 function Lynx:put(path: string, handler: Handler)
-	self:addRoute("PUT", path, handler)
+	self:on("PUT", path, handler)
 end
 
 function Lynx:delete(path: string, handler: Handler)
-	self:addRoute("DELETE", path, handler)
+	self:on("DELETE", path, handler)
 end
 
 function Lynx:patch(path: string, handler: Handler)
-	self:addRoute("PATCH", path, handler)
+	self:on("PATCH", path, handler)
 end
 
 function Lynx:static(path: string, directory: string)
