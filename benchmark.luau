@@ -55,7 +55,7 @@ local routes = {
 	},
 }
 
-local ITERATIONS = 100000
+local ITERATIONS = 1000000
 
 for _, route in routes do
 	local total = 0
