@@ -34,6 +34,7 @@ function Lynx:route(path: string, app: Lynx)
 end
 
 function Lynx:addRoute(method: string, path: string, handler: Handler | Middleware)
+	method = method:upper()
 	self.router:add(method, path, handler)
 	table.insert(self.routes, { method = method, path = path, handler = handler })
 	return self

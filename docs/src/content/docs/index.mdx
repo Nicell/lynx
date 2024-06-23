@@ -1,0 +1,34 @@
+---
+title: Lynx Web Framework
+description: A fast and simple Luau web framework for Lune.
+template: splash
+hero:
+  tagline: A fast and simple Luau web framework for Lune.
+  image:
+    file: ../../assets/code.png
+  actions:
+    - text: Get started
+      link: /getting-started
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/Nicell/lynx
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+	<Card title="Simple API" icon="open-book">
+		Convenient methods for creating routes
+	</Card>
+	<Card title="Fast Routing" icon="rocket">
+		Efficient routing using a radix tree
+	</Card>
+	<Card title="Intuitive Middleware" icon="pencil">
+		Extend request handling easily
+	</Card>
+	<Card title="Powered by Lune" icon="moon">
+		Designed for the Lune runtime
+	</Card>
+</CardGrid>
