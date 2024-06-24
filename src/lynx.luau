@@ -12,6 +12,10 @@ local Lynx = {}
 Lynx.__index = Lynx
 
 export type Lynx = typeof(Lynx)
+export type LynxConfig = {
+	port: number?,
+	address: string?,
+}
 
 local defaultNotFound: Handler = function(c: Context): net.ServeResponse
 	c:status(404)
@@ -133,10 +137,14 @@ function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
 	end
 end
 
-function Lynx:serve(port: number?)
-	self.server = net.serve(port or 3000, function(req)
-		return self:dispatch(req)
-	end)
+function Lynx:serve(config: LynxConfig?)
+	local c = config or {}
+	self.server = net.serve(c.port or 3000, {
+		address = c.address or "http://0.0.0.0",
+		handleRequest = function(req)
+			return self:dispatch(req)
+		end,
+	})
 	return self
 end
 
