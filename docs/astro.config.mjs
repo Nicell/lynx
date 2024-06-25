@@ -5,6 +5,7 @@ import luau from './Luau.tmLanguage.json'
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://lynx.land',
 	prefetch: true,
 	markdown:{
 		shikiConfig: {
