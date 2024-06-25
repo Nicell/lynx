@@ -1,6 +1,6 @@
 -- Implementation of this benchmark: https://hono.dev/docs/concepts/benchmarks
 
-local Router = require("src/router")
+local Router = require("@lynx/router")
 
 local router = Router.new()
 

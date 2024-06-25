@@ -6,7 +6,7 @@ description: Get started with the Lynx Web Framework.
 Lynx is a fast and simple Luau web framework for Lune. Lynx is inspired by [Hono](https://hono.dev) and shares a similar API.
 
 ```luau
-local Lynx = require('lynx')
+local Lynx = require('@lynx')
 local app = Lynx.new()
 
 app:get('/', function(c)
@@ -30,6 +30,36 @@ To update Lynx, update the submodule from the remote.
 
 ```sh
 git submodule update --remote
+```
+
+### Require Alias
+
+To make requiring Lynx easier, you can add an alias to your project.
+
+```json
+// .luaurc
+{
+  "alias": {
+    "lynx": "lynx/src"
+  }
+}
+```
+
+If you're using the [Luau LSP](https://github.com/JohnnyMorganz/luau-lsp) VSCode extension, you can add the alias to your `settings.json`.
+
+```json
+// .vscode/settings.json
+{
+  "luau-lsp.require.directoryAliases": {
+    "@lynx": "lynx/src"
+  }
+}
+```
+
+Now you can require Lynx using the alias.
+
+```luau
+local Lynx = require('@lynx')
 ```
 
 ## Features

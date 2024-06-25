@@ -8,7 +8,7 @@ sidebar:
 The `Lynx` class is used to create your application.
 
 ```luau
-local Lynx = require('lynx')
+local Lynx = require('@lynx')
 
 local app = Lynx.new()
 
