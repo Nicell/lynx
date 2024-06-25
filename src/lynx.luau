@@ -5,6 +5,7 @@ local static = require("static")
 
 type Context = Context.Context
 export type Handler = (c: Context) -> net.ServeResponse
+export type ErrorHandler = (c: Context, error: string) -> net.ServeResponse
 export type Middleware = (c: Context, next: () -> ()) -> ()
 export type MatchResponse = { { params: { [string]: string }, handler: Handler | Middleware, score: number } }
 
@@ -22,11 +23,18 @@ local defaultNotFound: Handler = function(c: Context): net.ServeResponse
 	return c:text("Not Found")
 end
 
+local defaultErrorHandler: ErrorHandler = function(c: Context, error: string): net.ServeResponse
+	print("Error:", error)
+	c:status(500)
+	return c:text("Internal Server Error")
+end
+
 function Lynx.new()
 	local self = setmetatable({}, Lynx)
 	self.router = Router.new()
 	self.routes = {}
 	self.notFoundHandler = defaultNotFound
+	self.errorHandler = defaultErrorHandler
 	return self
 end
 
@@ -95,6 +103,11 @@ function Lynx:notFound(handler: Handler)
 	return self
 end
 
+function Lynx:onError(handler: Handler)
+	self.errorHandler = handler
+	return self
+end
+
 function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
 	local match: MatchResponse = self.router:match(req.method, req.path)
 
@@ -107,9 +120,15 @@ function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
 	if #match == 1 then
 		local handler = match[1].handler
 		context.req.params = match[1].params
-		return handler(context, function()
+		local success, result = pcall(handler, context, function()
 			return self.notFoundHandler(context) -- If the single handler is a middleware, it must be not found
-		end) or context.res
+		end)
+		
+		if success then
+			return result or context.res
+		else
+			return self.errorHandler(context, result)
+		end
 	end
 
 	local function dispatch(i)
@@ -126,9 +145,11 @@ function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
 		end)
 	end
 
-	dispatch(1)
+	local success, result = pcall(dispatch, 1)
 
-	if context.finalized then
+	if not success then
+		return self.errorHandler(context, result)
+	elseif context.finalized then
 		return context.res
 	else
 		return self.notFoundHandler(context)

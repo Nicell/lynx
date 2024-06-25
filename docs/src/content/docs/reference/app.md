@@ -113,6 +113,18 @@ app:notFound(function(c)
 end)
 ```
 
+### `:onError`
+
+`:onError(handler: ErrorHandler)`
+
+Define a custom error handler.
+
+```luau
+app:onError(function(c, err)
+  return c:text(`🚨 {err}`, 500)
+end)
+```
+
 ### `:serve`
 
 `:serve(port: number?)`
