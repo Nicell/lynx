@@ -107,11 +107,9 @@ function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
 	if #match == 1 then
 		local handler = match[1].handler
 		context.req.params = match[1].params
-		local success, result = pcall(handler, context)
-		if not success then
-			return self.notFoundHandler(context)
-		end
-		return result
+		return handler(context, function()
+			return self.notFoundHandler(context) -- If the single handler is a middleware, it must be not found
+		end) or context.res
 	end
 
 	local function dispatch(i)
