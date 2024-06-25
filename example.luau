@@ -1,4 +1,4 @@
-local Lynx = require("@lynx")
+local Lynx = require("@lynx/lynx")
 
 local app = Lynx.new()
 

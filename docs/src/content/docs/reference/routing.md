@@ -10,18 +10,18 @@ Routing is simple and powerful in Lynx.
 ## Basic
 
 ```luau
-app:get('/', function(c)
-  return c:text('Hello, Lynx!')
+app:get("/", function(c)
+  return c:text("Hello, Lynx!")
 end)
 
 -- Match all methods
-app:all('/all', function(c)
-  return c:text('All methods')
+app:all("/all", function(c)
+  return c:text("All methods")
 end)
 
 -- Match a custom method
-app:on('LIT', '/', function(c)
-  return c:text('Custom method')
+app:on("LIT", "/", function(c)
+  return c:text("Custom method")
 end)
 ```
 
@@ -37,9 +37,9 @@ LIT  /    -> Custom method
 Paths can contain named parameters that are extracted from the URL.
 
 ```luau
-app:get('/hello/:name', function(c)
+app:get("/hello/:name", function(c)
   local name = c.req.params.name
-  return c:text('Hello, ' .. name .. '!')
+  return c:text("Hello, " .. name .. "!")
 end)
 ```
 
@@ -50,10 +50,10 @@ GET /hello/Dave -> Hello, Dave!
 You can have multiple parameters in a path.
 
 ```luau
-app:get('/hello/:first/:last', function(c)
+app:get("/hello/:first/:last", function(c)
   local first = c.req.params.first
   local last = c.req.params.last
-  return c:text('Hello, ' .. first .. ' ' .. last .. '!')
+  return c:text("Hello, " .. first .. " " .. last .. "!")
 end)
 ```
 
@@ -66,8 +66,8 @@ GET /hello/Dave/Baszucki -> Hello, Dave Baszucki!
 Wildcards can be used to match multiple paths. When placed at the end of a path, it matches any path that starts with the prefix.
 
 ```luau
-app:get('/hello/*', function(c)
-  return c:text('Hello, Wildcard!')
+app:get("/hello/*", function(c)
+  return c:text("Hello, Wildcard!")
 end)
 ```
 
@@ -79,8 +79,8 @@ GET /hello/world/again -> Hello, Wildcard!
 If you don't need a named parameter, you can use a wildcard instead. It only matches one level.
 
 ```luau
-app:get('/wild/*/card', function(c)
-  return c:text('Hello, Wildcard!')
+app:get("/wild/*/card", function(c)
+  return c:text("Hello, Wildcard!")
 end)
 ```
 
@@ -96,11 +96,11 @@ Routes can be grouped in sub-apps and then routed on the main app.
 ```luau
 local api = Lynx.new()
 
-api:get('/hello', function(c)
-  return c:text('Hello, API!')
+api:get("/hello", function(c)
+  return c:text("Hello, API!")
 end)
 
-app:route('/api', api)
+app:route("/api", api)
 ```
 
 ```
@@ -113,7 +113,7 @@ Middleware can be used to modify the context before or after the handler is exec
 
 ```luau
 app:use(function(c, next)
-  c:header('X-Request-Id', '123')
+  c:header("X-Request-Id", "123")
   next()
 end)
 ```
@@ -121,9 +121,9 @@ end)
 If you don't specify, it's applied to all routes. It can be applied to a specific path.
 
 ```luau
-app:use('/admin/*', function(c, next)
-  if not c.req.headers['Authorization'] then
-    return c:status(401):text('Unauthorized')
+app:use("/admin/*", function(c, next)
+  if not c.req.headers["Authorization"] then
+    return c:status(401):text("Unauthorized")
   end
   next()
 end)
@@ -136,7 +136,7 @@ app:use(function(c, next)
   local start = os.clock()
   next()
   local time = os.clock() - start
-  c:header('X-Response-Time', time)
+  c:header("X-Response-Time", time)
 end)
 ```
 
@@ -145,12 +145,12 @@ end)
 Handlers and middleware are executed in the order they are defined.
 
 ```luau
-app:get('/hello/world', function(c)
-  return c:text('Hello, World!')
+app:get("/hello/world", function(c)
+  return c:text("Hello, World!")
 end)
 
-app:get('/hello/:name', function(c)
-  return c:text('Hello, stranger!')
+app:get("/hello/:name", function(c)
+  return c:text("Hello, stranger!")
 end)
 ```
 
@@ -162,12 +162,12 @@ GET /hello/other -> Hello, stranger!
 Once the first handler is executed, no more handlers are executed for that request.
 
 ```luau
-app:get('/*', function(c)
-  return c:text('Defined first')
+app:get("/*", function(c)
+  return c:text("Defined first")
 end)
 
-app:get('/two', function(c)
-  return c:text('Defined second')
+app:get("/two", function(c)
+  return c:text("Defined second")
 end)
 ```
 
@@ -183,11 +183,11 @@ app:use(function(c, next)
   local start = os.clock()
   next()
   local time = os.clock() - start
-  c:header('X-Response-Time', time)
+  c:header("X-Response-Time", time)
 end)
 
-app:get('/time', function(c)
-  return c:text('Response time')
+app:get("/time", function(c)
+  return c:text("Response time")
 end)
 ```
 

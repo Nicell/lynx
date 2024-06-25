@@ -45,14 +45,14 @@ function Node:insert(method: string, path: string, handler: () -> ())
 		end
 	end
 
-	if currentNode.methods[method] then
-		error(`Handler already exists for {method} {path}`)
+	if not currentNode.methods[method] then
+		currentNode.methods[method] = {}
 	end
 
-	currentNode.methods[method] = {
+	table.insert(currentNode.methods[method], {
 		handler = handler,
 		score = self.order,
-	}
+	})
 	currentNode.name = path
 end
 
@@ -60,31 +60,41 @@ function Node:getHandlers(method: string, params: { [string]: string }?)
 	local handlers = {}
 
 	if self.methods[method] then
-		table.insert(
-			handlers,
-			{ params = params, handler = self.methods[method].handler, score = self.methods[method].score }
-		)
+		for _, entry in self.methods[method] do
+			table.insert(handlers, {
+				params = params,
+				handler = entry.handler,
+				score = entry.score,
+			})
+		end
 	end
 	if self.methods["ALL"] then
-		table.insert(
-			handlers,
-			{ params = params, handler = self.methods["ALL"].handler, score = self.methods["ALL"].score }
-		)
+		for _, entry in self.methods["ALL"] do
+			table.insert(handlers, {
+				params = params,
+				handler = entry.handler,
+				score = entry.score,
+			})
+		end
 	end
 	if self.wildcard then
 		if self.wildcard.methods[method] then
-			table.insert(handlers, {
-				params = params,
-				handler = self.wildcard.methods[method].handler,
-				score = self.wildcard.methods[method].score,
-			})
+			for _, entry in self.wildcard.methods[method] do
+				table.insert(handlers, {
+					params = params,
+					handler = entry.handler,
+					score = entry.score,
+				})
+			end
 		end
 		if self.wildcard.methods["ALL"] then
-			table.insert(handlers, {
-				params = params,
-				handler = self.wildcard.methods["ALL"].handler,
-				score = self.wildcard.methods["ALL"].score,
-			})
+			for _, entry in self.wildcard.methods["ALL"] do
+				table.insert(handlers, {
+					params = params,
+					handler = entry.handler,
+					score = entry.score,
+				})
+			end
 		end
 	end
 	return handlers

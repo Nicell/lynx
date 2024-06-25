@@ -8,7 +8,7 @@ sidebar:
 The `Lynx` class is used to create your application.
 
 ```luau
-local Lynx = require('@lynx')
+local Lynx = require("@lynx/lynx")
 
 local app = Lynx.new()
 
@@ -32,8 +32,8 @@ Supported methods: `:get`, `:post`, `:put`, `:delete`, `:patch`
 Define a route for a specific HTTP method.
 
 ```luau
-app:get('/', function(c)
-  return c:text('Hello, Lynx!')
+app:get("/", function(c)
+  return c:text("Hello, Lynx!")
 end)
 ```
 
@@ -44,8 +44,8 @@ end)
 Define a route that matches all HTTP methods.
 
 ```luau
-app:all('/all', function(c)
-  return c:text('All methods')
+app:all("/all", function(c)
+  return c:text("All methods")
 end)
 ```
 
@@ -56,8 +56,8 @@ end)
 Define a route for a specific or custom HTTP method.
 
 ```luau
-app:on('CUSTOM', '/custom', function(c)
-  return c:text('Custom method')
+app:on("CUSTOM", "/custom", function(c)
+  return c:text("Custom method")
 end)
 ```
 
@@ -69,9 +69,9 @@ Create a middleware that runs on every request or on a specific path.
 
 ```luau
 app:use(function(c, next)
-  print('Before request')
+  print("Before request")
   next()
-  print('After request')
+  print("After request")
 end)
 ```
 
@@ -82,7 +82,7 @@ end)
 Serve static files from a directory.
 
 ```luau
-app:static('/static', 'public')
+app:static("/static", "public")
 ```
 
 ### `:route`
@@ -94,11 +94,11 @@ Mount a sub-application at a specific path.
 ```luau
 local api = Lynx.new()
 
-api:get('/', function(c)
-  return c:text('api')
+api:get("/", function(c)
+  return c:text("api")
 end)
 
-app:route('/api', api)
+app:route("/api", api)
 ```
 
 ### `:notFound`
