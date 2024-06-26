@@ -156,6 +156,18 @@ function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
 	end
 end
 
+function Lynx:request(request: string | net.ServeRequest): net.ServeResponse
+	if type(request) == "string" then
+		request = {
+			method = "GET",
+			path = request,
+			body = "",
+			headers = {},
+		} :: net.ServeRequest
+	end
+	return self:dispatch(request)
+end
+
 function Lynx:serve(config: LynxConfig?)
 	local c = config or {}
 	self.server = net.serve(c.port or 3000, {

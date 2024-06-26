@@ -122,7 +122,7 @@ If you don't specify, it's applied to all routes. It can be applied to a specifi
 
 ```luau
 app:use("/admin/*", function(c, next)
-  if not c.req.headers["Authorization"] then
+  if not c.req.headers["authorization"] then
     return c:status(401):text("Unauthorized")
   end
   next()

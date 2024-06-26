@@ -125,6 +125,25 @@ app:onError(function(c, err)
 end)
 ```
 
+### `:request`
+
+`:request(request: string | net.ServeRequest)`
+
+Send a request to the application and return the response. This can be useful for testing your application.
+
+```luau
+local response = app:request("/hello")
+```
+
+Alternatively, you can pass a `net.ServeRequest` object.
+
+```luau
+local response = app:request({
+  method = "POST",
+  path = "/create"
+})
+```
+
 ### `:serve`
 
 `:serve(port: number?)`
