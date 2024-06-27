@@ -1,9 +1,19 @@
 local Node = {}
 Node.__index = Node
 
-export type Node = typeof(Node)
+export type Node = typeof(setmetatable(
+	{} :: {
+		methods: { [string]: { { handler: (...any) -> ...any, score: number } } },
+		children: { [string]: Node },
+		order: number,
+		name: string,
+		params: { [string]: Node },
+		wildcard: Node?,
+	},
+	Node
+))
 
-function Node.new()
+function Node.new(): Node
 	local self = setmetatable({}, Node)
 	self.methods = {}
 	self.children = {}
@@ -14,7 +24,7 @@ function Node.new()
 	return self
 end
 
-function Node:insert(method: string, path: string, handler: () -> ())
+function Node.insert(self: Node, method: string, path: string, handler: (...any) -> ...any)
 	local currentNode = self
 	local parts = path:split("/")
 	self.order += 1
@@ -35,7 +45,7 @@ function Node:insert(method: string, path: string, handler: () -> ())
 				currentNode.wildcard = Node.new()
 				currentNode.wildcard.order = currentNode.order + 1
 			end
-			currentNode = currentNode.wildcard
+			currentNode = currentNode.wildcard :: Node
 		else
 			if not currentNode.children[part] then
 				currentNode.children[part] = Node.new()
@@ -56,7 +66,7 @@ function Node:insert(method: string, path: string, handler: () -> ())
 	currentNode.name = path
 end
 
-function Node:getHandlers(method: string, params: { [string]: string }?)
+function Node.getHandlers(self: Node, method: string, params: { [string]: string }?)
 	local handlers = {}
 
 	if self.methods[method] then
@@ -100,12 +110,7 @@ function Node:getHandlers(method: string, params: { [string]: string }?)
 	return handlers
 end
 
-function Node:search(
-	method: string,
-	parts: { string },
-	depth: number,
-	params: { [string]: string }?
-): { { params: { [string]: string }?, handler: () -> (), score: number } }
+function Node.search(self: Node, method: string, parts: { string }, depth: number, params: { [string]: string }?)
 	local p = parts[depth]
 
 	if p == nil then
@@ -119,7 +124,7 @@ function Node:search(
 	end
 
 	for param, node in self.params do
-		local newParams = if params then table.clone(params) else {}
+		local newParams: { [string]: string } = if params then table.clone(params) else {}
 		newParams[param] = p
 		local paramHandlers = node:search(method, parts, depth + 1, newParams)
 		if handlers then

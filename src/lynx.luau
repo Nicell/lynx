@@ -3,16 +3,26 @@ local Router = require("router")
 local Context = require("context")
 local static = require("static")
 
+type Router = Router.Router
 type Context = Context.Context
 export type Handler = (c: Context) -> net.ServeResponse
 export type ErrorHandler = (c: Context, error: string) -> net.ServeResponse
 export type Middleware = (c: Context, next: () -> ()) -> ()
-export type MatchResponse = { { params: { [string]: string }, handler: Handler | Middleware, score: number } }
+export type MatchResponse = { { params: { [string]: string }?, handler: Handler | Middleware, score: number } }
 
 local Lynx = {}
 Lynx.__index = Lynx
 
-export type Lynx = typeof(Lynx)
+export type Lynx = typeof(setmetatable(
+	{} :: {
+		router: Router,
+		routes: { { method: string, path: string, handler: Handler | Middleware } },
+		notFoundHandler: Handler,
+		errorHandler: ErrorHandler,
+		server: net.ServeHandle?,
+	},
+	Lynx
+))
 export type LynxConfig = {
 	port: number?,
 	address: string?,
@@ -29,7 +39,7 @@ local defaultErrorHandler: ErrorHandler = function(c: Context, error: string): n
 	return c:text("Internal Server Error")
 end
 
-function Lynx.new()
+function Lynx.new(): Lynx
 	local self = setmetatable({}, Lynx)
 	self.router = Router.new()
 	self.routes = {}
@@ -38,21 +48,21 @@ function Lynx.new()
 	return self
 end
 
-function Lynx:route(path: string, app: Lynx)
+function Lynx.route(self: Lynx, path: string, app: Lynx)
 	for _, route in app.routes do
 		self:addRoute(route.method, path .. route.path, route.handler)
 	end
 	return self
 end
 
-function Lynx:addRoute(method: string, path: string, handler: Handler | Middleware)
+function Lynx.addRoute(self: Lynx, method: string, path: string, handler: Handler | Middleware)
 	method = method:upper()
 	self.router:add(method, path, handler)
 	table.insert(self.routes, { method = method, path = path, handler = handler })
 	return self
 end
 
-function Lynx:use(path: string | Middleware, handler: Middleware?)
+function Lynx.use(self: Lynx, path: string | Middleware, handler: Middleware?)
 	local realPath = path
 	if handler == nil then
 		if type(path) == "string" then
@@ -62,53 +72,53 @@ function Lynx:use(path: string | Middleware, handler: Middleware?)
 		realPath = "*"
 	end
 
-	self.router:add("ALL", realPath, handler)
+	self.router:add("ALL", realPath :: string, handler :: Middleware)
 	return self
 end
 
-function Lynx:on(method: string, path: string, handler: Handler)
+function Lynx.on(self: Lynx, method: string, path: string, handler: Handler)
 	return self:addRoute(method, path, handler)
 end
 
-function Lynx:all(path: string, handler: Handler)
+function Lynx.all(self: Lynx, path: string, handler: Handler)
 	return self:on("ALL", path, handler)
 end
 
-function Lynx:get(path: string, handler: Handler)
+function Lynx.get(self: Lynx, path: string, handler: Handler)
 	return self:on("GET", path, handler)
 end
 
-function Lynx:post(path: string, handler: Handler)
+function Lynx.post(self: Lynx, path: string, handler: Handler)
 	return self:on("POST", path, handler)
 end
 
-function Lynx:put(path: string, handler: Handler)
+function Lynx.put(self: Lynx, path: string, handler: Handler)
 	return self:on("PUT", path, handler)
 end
 
-function Lynx:delete(path: string, handler: Handler)
+function Lynx.delete(self: Lynx, path: string, handler: Handler)
 	return self:on("DELETE", path, handler)
 end
 
-function Lynx:patch(path: string, handler: Handler)
+function Lynx.patch(self: Lynx, path: string, handler: Handler)
 	return self:on("PATCH", path, handler)
 end
 
-function Lynx:static(path: string, directory: string)
+function Lynx.static(self: Lynx, path: string, directory: string)
 	return self:get(path:gsub("/$", "") .. "/*", static(path, directory))
 end
 
-function Lynx:notFound(handler: Handler)
+function Lynx.notFound(self: Lynx, handler: Handler)
 	self.notFoundHandler = handler
 	return self
 end
 
-function Lynx:onError(handler: Handler)
+function Lynx.onError(self: Lynx, handler: Handler)
 	self.errorHandler = handler
 	return self
 end
 
-function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
+function Lynx.dispatch(self: Lynx, req: net.ServeRequest): net.ServeResponse
 	local match: MatchResponse = self.router:match(req.method, req.path)
 
 	local context = Context.new(req, self.notFoundHandler)
@@ -119,24 +129,24 @@ function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
 
 	if #match == 1 then
 		local handler = match[1].handler
-		context.req.params = match[1].params
+		context.req.params = match[1].params or {}
 		local success, result = pcall(handler, context, function()
 			return self.notFoundHandler(context) -- If the single handler is a middleware, it must be not found
 		end)
-		
+
 		if success then
 			return result or context.res
 		else
-			return self.errorHandler(context, result)
+			return self.errorHandler(context, (result :: unknown) :: string)
 		end
 	end
 
-	local function dispatch(i)
+	local function dispatch(i): net.ServeResponse?
 		if i > #match then
 			return self.notFoundHandler(context)
 		end
 
-		context.req.params = match[i].params
+		context.req.params = match[i].params or {}
 
 		local handler = match[i].handler
 
@@ -148,7 +158,7 @@ function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
 	local success, result = pcall(dispatch, 1)
 
 	if not success then
-		return self.errorHandler(context, result)
+		return self.errorHandler(context, (result :: unknown) :: string)
 	elseif context.finalized then
 		return context.res
 	else
@@ -156,20 +166,18 @@ function Lynx:dispatch(req: net.ServeRequest): net.ServeResponse
 	end
 end
 
-function Lynx:request(request: string | net.ServeRequest): net.ServeResponse
+function Lynx.request(self: Lynx, request: string | net.ServeRequest): net.ServeResponse
 	if type(request) == "string" then
 		request = {
 			method = "GET",
 			path = request,
-			body = "",
-			headers = {},
 		} :: net.ServeRequest
 	end
-	return self:dispatch(request)
+	return self:dispatch(request :: net.ServeRequest)
 end
 
-function Lynx:serve(config: LynxConfig?)
-	local c = config or {}
+function Lynx.serve(self: Lynx, config: LynxConfig?)
+	local c: LynxConfig = config or {}
 	self.server = net.serve(c.port or 3000, {
 		address = c.address or "http://0.0.0.0",
 		handleRequest = function(req)

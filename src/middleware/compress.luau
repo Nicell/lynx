@@ -24,12 +24,12 @@ local function compress()
 				break
 			end
 		end
-    if not encoding or not c.res.body then
-      return
-    end
-    c:header("Content-Length", nil)
-    c:header("Content-Encoding", encoding.name)
-    c.res.body = serde.compress(encoding.encode, c.res.body)
+		if not encoding or not c.res.body then
+			return
+		end
+		c:header("Content-Length", nil)
+		c:header("Content-Encoding", encoding.name)
+		c.res.body = serde.compress(encoding.encode, c.res.body)
 	end
 end
 

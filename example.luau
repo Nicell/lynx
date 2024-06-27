@@ -7,7 +7,7 @@ app:use(function(c, next)
 	local start = os.clock()
 	next()
 	local time = os.clock() - start
-	c:header("X-Response-Time", time)
+	c:header("X-Response-Time", tostring(time))
 end)
 
 -- Send text response with a parameter and query string
