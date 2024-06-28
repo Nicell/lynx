@@ -78,8 +78,8 @@ local mimeTypes = {
 	xml = "application/xml",
 	xul = "application/vnd.mozilla.xul+xml",
 	zip = "application/zip",
-	["3gp"] = "video/3gpp; audio/3gpp if it doesn't contain video",
-	["3g2"] = "video/3gpp2; audio/3gpp2 if it doesn't contain video",
+	["3gp"] = "video/3gpp",
+	["3g2"] = "video/3gpp2",
 	["7z"] = "application/x-7z-compressed",
 }
 
@@ -89,7 +89,7 @@ local function getMimeType(file: string): string
 		extension = extension:sub(2):lower() -- Remove the dot and convert to lowercase
 		local mimeType = mimeTypes[extension]
 		if mimeType and mimeType:find("^text") ~= nil then
-			mimeType = mimeType .. "; charset=utf-8"
+			mimeType ..= "; charset=utf-8"
 		end
 		return mimeType or "application/octet-stream"
 	end

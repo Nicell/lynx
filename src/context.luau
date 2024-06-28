@@ -33,6 +33,7 @@ end
 
 function Context.set(self: Context, key: string, value: any)
 	self.state[key] = value
+	return self
 end
 
 function Context.get(self: Context, key: string): any
@@ -41,10 +42,12 @@ end
 
 function Context.header(self: Context, key: string, value: string)
 	self.res.headers[key] = value
+	return self
 end
 
 function Context.status(self: Context, status: number)
 	self.res.status = status
+	return self
 end
 
 function Context.body(self: Context, body: buffer | string, status: number?, headers: any?): net.ServeResponse

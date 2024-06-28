@@ -1,6 +1,6 @@
 local datetime = require("@lune/datetime")
 local process = require("@lune/process")
-local Context = require("@lynx/context")
+local Context = require("../context")
 type Context = Context.Context
 
 local color = if process.env.NO_COLOR then false else true
@@ -31,7 +31,7 @@ local function statusColor(code: number?): string
 end
 
 local function logger(func: (string) -> ()?)
-	local fn = func or print
+	local fn: (string) -> () = func or print
 	return function(c: Context, next: () -> ())
 		local start = os.clock()
 		next()

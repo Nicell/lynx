@@ -1,5 +1,5 @@
 local serde = require("@lune/serde")
-local Context = require("@lynx/context")
+local Context = require("../context")
 type Context = Context.Context
 
 local ENCODINGS: { { name: string, encode: serde.CompressDecompressFormat } } = {
