@@ -1,5 +1,5 @@
 ---
-title: Compress Middleware
+title: Compression Middleware
 sidebar:
   label: Compress
 description: Compress response bodies.
