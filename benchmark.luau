@@ -61,7 +61,7 @@ for _, route in routes do
 	local total = 0
 	for _ = 1, ITERATIONS do
 		local start = os.clock()
-		router:match(route.method, route.path)
+		Router.match(router, route.method, route.path)
 		local finish = os.clock()
 		total += finish - start
 	end
@@ -77,7 +77,7 @@ local totalTogether = 0
 for _ = 1, ITERATIONS do
 	local start = os.clock()
 	for _, route in routes do
-		router:match(route.method, route.path)
+		Router.match(router, route.method, route.path)
 	end
 	local finish = os.clock()
 	totalTogether += finish - start

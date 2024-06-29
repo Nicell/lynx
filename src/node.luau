@@ -114,19 +114,19 @@ function Node.search(self: Node, method: string, parts: { string }, depth: numbe
 	local p = parts[depth]
 
 	if p == nil then
-		return self:getHandlers(method, params)
+		return Node.getHandlers(self, method, params)
 	end
 
 	local handlers = nil
 
 	if self.children[p] then
-		handlers = self.children[p]:search(method, parts, depth + 1, params)
+		handlers = Node.search(self.children[p], method, parts, depth + 1, params)
 	end
 
 	for param, node in self.params do
 		local newParams: { [string]: string } = if params then table.clone(params) else {}
 		newParams[param] = p
-		local paramHandlers = node:search(method, parts, depth + 1, newParams)
+		local paramHandlers = Node.search(node, method, parts, depth + 1, newParams)
 		if handlers then
 			table.move(paramHandlers, 1, #paramHandlers, #handlers + 1, handlers)
 		else
@@ -135,9 +135,9 @@ function Node.search(self: Node, method: string, parts: { string }, depth: numbe
 	end
 
 	if self.wildcard then
-		local wildcardHandlers = self.wildcard:search(method, parts, depth + 1, params)
+		local wildcardHandlers = Node.search(self.wildcard, method, parts, depth + 1, params)
 		if depth + 1 <= #parts then -- Search is still ongoing, check for direct wildcard handlers
-			local directHandlers = self:getHandlers(method, params)
+			local directHandlers = Node.getHandlers(self, method, params)
 			if wildcardHandlers then
 				table.move(directHandlers, 1, #directHandlers, #wildcardHandlers + 1, wildcardHandlers)
 			else

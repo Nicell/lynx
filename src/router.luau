@@ -22,9 +22,9 @@ function Router.add(self: Router, method: string, path: string, handler: (...any
 end
 
 function Router.match(self: Router, method: string, path: string)
-	local parts = path:sub(2):split("/")
+	local parts = string.split(string.sub(path, 2), "/")
 
-	local handlers = self.node:search(method, parts, 1)
+	local handlers = Node.search(self.node, method, parts, 1)
 
 	if handlers then
 		table.sort(handlers, function(a, b)

@@ -119,7 +119,7 @@ function Lynx.onError(self: Lynx, handler: Handler)
 end
 
 function Lynx.dispatch(self: Lynx, req: net.ServeRequest): net.ServeResponse
-	local match: MatchResponse = self.router:match(req.method, req.path)
+	local match: MatchResponse = Router.match(self.router, req.method, req.path)
 
 	local context = Context.new(req, self.notFoundHandler)
 
@@ -181,7 +181,7 @@ function Lynx.serve(self: Lynx, config: LynxConfig?)
 	self.server = net.serve(c.port or 3000, {
 		address = c.address or "http://0.0.0.0",
 		handleRequest = function(req)
-			return self:dispatch(req)
+			return Lynx.dispatch(self, req)
 		end,
 	})
 	return self
