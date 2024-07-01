@@ -15,7 +15,7 @@ local function validator(target: ValidationTarget | ValidationFunction, validati
   return function(c: Context, next: () -> ()): net.ServeResponse?
     local value
     if targ == "json" then
-      local success, json = pcall(net.jsonDecode, c.req.body)
+      local success, json = pcall(c.req.json, c.req)
       if not success then
         return c:status(400):text("Invalid JSON")
       end
