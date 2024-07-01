@@ -11,7 +11,14 @@ The `Context` object is passed to route handlers and middleware functions. It co
 
 ### `req`
 
-The request object. Contains information about the incoming request. This table extends the [Lune ServeRequest](https://lune-org.github.io/docs/api-reference/net#serverequest) with the `params` field, which is a table of key-value pairs representing path parameters.
+The request object. Contains information about the incoming request. This table extends the [Lune ServeRequest](https://lune-org.github.io/docs/api-reference/net#serverequest) with the following:
+
+- `params`: `{string: string}`
+  - Path parameters extracted from the route path.
+- `valid`: `{string: any}`
+  - Validated data from the request. This table is populated by the [validator](/reference/validation).
+- `:json()`:
+  - Parse the request body as JSON.
 
 ```luau
 app:get("/hello/:name", function(c)

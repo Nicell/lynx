@@ -25,7 +25,7 @@ For details on path routing, see the [Routing](/reference/routing) page.
 
 ### `:<method>`
 
-`:<method>(path: string, handler: Handler)`
+`:<method>(path: string, handler: Handler | Middleware, ...: Handler | Middleware)`
 
 Supported methods: `:get`, `:post`, `:put`, `:delete`, `:patch`
 
@@ -39,7 +39,7 @@ end)
 
 ### `:all`
 
-`:all(path: string, handler: Handler)`
+`:all(path: string, handler: Handler | Middleware, ...: Handler | Middleware)`
 
 Define a route that matches all HTTP methods.
 
@@ -51,7 +51,7 @@ end)
 
 ### `:on`
 
-`:on(method: string, path: string, handler: Handler)`
+`:on(method: string, path: string, handler: Handler | Middleware, ...: Handler | Middleware)`
 
 Define a route for a specific or custom HTTP method.
 
@@ -63,7 +63,7 @@ end)
 
 ### `:use`
 
-`:use(middleware: Middleware)` or `:use(path: string, middleware: Middleware)`
+`:use(middleware: Middleware, ...: Middleware)` <br> or <br> `:use(path: string, middleware: Middleware, ...: Middleware)`
 
 Create a middleware that runs on every request or on a specific path.
 
