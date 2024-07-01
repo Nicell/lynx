@@ -3,5 +3,9 @@
   "luau-lsp.require.directoryAliases": {
     "@lune/": "~/.lune/.typedefs/0.8.6/",
     "@lynx": "./src"
+  },
+  "luau-lsp.sourcemap.enabled": false,
+  "luau-lsp.fflags.override": {
+    // "DebugLuauDeferredConstraintResolution": "True"
   }
 }

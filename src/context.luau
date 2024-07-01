@@ -2,7 +2,9 @@ local net = require("@lune/net")
 local Context = {}
 Context.__index = Context
 
-export type LynxRequest = net.ServeRequest & { params: { [string]: string } }
+export type LynxRequest =
+	net.ServeRequest
+	& { params: { [string]: string }, valid: { [string]: any }, json: (self: LynxRequest) -> any }
 export type Context = typeof(setmetatable(
 	{} :: {
 		req: LynxRequest,
@@ -14,9 +16,9 @@ export type Context = typeof(setmetatable(
 	Context
 ))
 
-function Context.new(req: net.ServeRequest, notFoundHandler): Context
+function Context.new(req: LynxRequest, notFoundHandler): Context
 	local self = setmetatable({}, Context)
-	self.req = req :: LynxRequest
+	self.req = req
 	self.res = {
 		headers = {},
 	}

@@ -61,6 +61,17 @@ end)
 GET /hello/Dave/Baszucki -> Hello, Dave Baszucki!
 ```
 
+## JSON
+
+JSON can be retrieved from the request body.
+
+```luau
+app:post("/json", function(c)
+  local body = c.req:json()
+  return c:json(body)
+end)
+```
+
 ## Wildcards
 
 Wildcards can be used to match multiple paths. When placed at the end of a path, it matches any path that starts with the prefix.
