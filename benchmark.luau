@@ -75,12 +75,12 @@ end
 local totalTogether = 0
 
 for _ = 1, ITERATIONS do
-	local start = os.clock()
 	for _, route in routes do
+		local start = os.clock()
 		Router.match(router, route.method, route.path)
+		local finish = os.clock()
+		totalTogether += finish - start
 	end
-	local finish = os.clock()
-	totalTogether += finish - start
 end
 
 local average = totalTogether / ITERATIONS
