@@ -3,7 +3,9 @@ title: Getting Started
 description: Get started with the Lynx Web Framework.
 ---
 
-Lynx is a fast and simple Luau web framework for Lune. Lynx is inspired by [Hono](https://hono.dev) and shares a similar API.
+Lynx is a fast and simple web framework for [Lune](https://github.com/lune-org/lune), a general purpose runtime for the [Luau programming language](https://luau.org). Lynx is inspired by [Hono](https://hono.dev/) and shares a similar API.
+
+## Basic usage
 
 ```luau
 local Lynx = require("@lynx/lynx")
@@ -32,34 +34,43 @@ To update Lynx, update the submodule from the remote.
 git submodule update --remote
 ```
 
-### Require Alias
+### Editor setup and require aliases
 
-To make requiring Lynx easier, you can add an alias to your project.
+To make importing Lynx easier, you can add a `.luaurc` require alias to your project:
 
 ```json
 // .luaurc
 {
-  "alias": {
-    "lynx": "lynx/src"
+  "aliases": {
+    "lynx": "lynx/src/"
   }
 }
 ```
 
-If you're using the [Luau LSP](https://github.com/JohnnyMorganz/luau-lsp) VSCode extension, you can add the alias to your `settings.json`.
+If you're using the [Luau LSP](https://github.com/JohnnyMorganz/luau-lsp) VSCode extension, add this  `directoryAlias` to your VSCode workspace's `settings.json`:
 
 ```json
 // .vscode/settings.json
 {
   "luau-lsp.require.directoryAliases": {
-    "@lynx": "lynx/src"
+    "@lynx": "lynx/src/"
   }
 }
 ```
+This should give you inline autocompletion, inline documentation, and type-hinting support in your editor.
 
-Now you can require Lynx using the alias.
+#### If you encounter "invalid require" TypeErrors or other issues when trying to require Lynx, try:
+- closing and re-opening your `.luau` files,
+- making sure you've opened the current folder as a VSCode workspace,
+- checking your `.luaurc` and `directoryAliases` for syntax, spelling, invalid whitespaces and/or missing trailing slashes (sometimes can cause platform-specific issues),
+- and restarting the Luau LSP extension. 
+
+### Using Lynx in your project
+Now you can require Lynx using the alias `"@lynx/lynx"`:
 
 ```luau
-local Lynx = require("@lynx/lynx")
+-- main.luau (or any other location in your project)
+local Lynx = require("@lynx/lynx") -- hover over the Lynx variable for inline documentation
 ```
 
 ## Features
@@ -68,6 +79,5 @@ local Lynx = require("@lynx/lynx")
 - ⚡️ **Fast Routing** - Efficient routing using a radix tree
 - 📦 **Intuitive Middleware** - Extend request handling easily
 
-## Use Cases
-
-Lynx is a simple web framework that can be used for a variety of applications. It can be used for a simple web API, a proxy server, or it can be composed with other services.
+## Use cases
+Lynx can be used to write a simple web API, a quick-and-easy simple html website, a proxy server, or to glue other web services together for extra potential!
