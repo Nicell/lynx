@@ -1,30 +1,35 @@
+local Types = require("./types")
+
 local Node = {}
 Node.__index = Node
 
-export type Node = typeof(setmetatable(
-	{} :: {
-		methods: { [string]: { { handler: (...any) -> ...any, score: number } } },
-		children: { [string]: Node },
-		order: number,
-		name: string,
-		params: { [string]: Node },
-		wildcard: Node?,
-	},
-	Node
-))
+type MatchResponse = Types.MatchResponse
+type Handler = Types.Handler
+type Middleware = Types.Middleware
+
+type NodeData = {
+	methods: { [string]: { { handler: Handler | Middleware, score: number } } },
+	children: { [string]: Node },
+	order: number,
+	name: string,
+	params: { [string]: Node },
+	wildcard: Node?,
+}
+
+export type Node = typeof(setmetatable({} :: NodeData, Node))
 
 function Node.new(): Node
-	local self = setmetatable({}, Node)
+	local self = {}
 	self.methods = {}
 	self.children = {}
 	self.order = 0
 	self.name = ""
 	self.params = {}
-	self.wildcard = nil
-	return self
+	self.wildcard = nil :: Node?
+	return setmetatable(self, Node)
 end
 
-function Node.insert(self: Node, method: string, path: string, handler: (...any) -> ...any)
+function Node.insert(self: Node, method: string, path: string, handler: Handler | Middleware)
 	local currentNode = self
 	local parts = path:split("/")
 	self.order += 1
@@ -39,7 +44,7 @@ function Node.insert(self: Node, method: string, path: string, handler: (...any)
 				currentNode.params[paramName] = Node.new()
 				currentNode.params[paramName].order = currentNode.order + 1
 			end
-			currentNode = currentNode.params[paramName]
+			currentNode = currentNode.params[paramName] :: Node
 		elseif part == "*" then
 			if not currentNode.wildcard then
 				currentNode.wildcard = Node.new()
@@ -51,7 +56,7 @@ function Node.insert(self: Node, method: string, path: string, handler: (...any)
 				currentNode.children[part] = Node.new()
 				currentNode.children[part].order = currentNode.order + 1
 			end
-			currentNode = currentNode.children[part]
+			currentNode = currentNode.children[part] :: Node
 		end
 	end
 
@@ -110,14 +115,14 @@ function Node.getHandlers(self: Node, method: string, params: { [string]: string
 	return handlers
 end
 
-function Node.search(self: Node, method: string, parts: { string }, depth: number, params: { [string]: string }?)
+function Node.search(self: Node, method: string, parts: { string }, depth: number, params: { [string]: string }?): MatchResponse?
 	local p = parts[depth]
 
-	if p == nil then
+	if not p then
 		return Node.getHandlers(self, method, params)
 	end
 
-	local handlers = nil
+	local handlers: MatchResponse? = nil
 
 	if self.children[p] then
 		handlers = Node.search(self.children[p], method, parts, depth + 1, params)
@@ -127,27 +132,31 @@ function Node.search(self: Node, method: string, parts: { string }, depth: numbe
 		local newParams: { [string]: string } = if params then table.clone(params) else {}
 		newParams[param] = p
 		local paramHandlers = Node.search(node, method, parts, depth + 1, newParams)
-		if handlers then
-			table.move(paramHandlers, 1, #paramHandlers, #handlers + 1, handlers)
-		else
-			handlers = paramHandlers
+		if paramHandlers then
+			if handlers then
+				table.move(paramHandlers, 1, #paramHandlers, #handlers + 1, handlers)
+			else
+				handlers = paramHandlers
+			end
 		end
 	end
 
 	if self.wildcard then
 		local wildcardHandlers = Node.search(self.wildcard, method, parts, depth + 1, params)
 		if depth + 1 <= #parts then -- Search is still ongoing, check for direct wildcard handlers
-			local directHandlers = Node.getHandlers(self, method, params)
+			local directHandlers = Node.getHandlers(self :: Node, method, params)
 			if wildcardHandlers then
 				table.move(directHandlers, 1, #directHandlers, #wildcardHandlers + 1, wildcardHandlers)
 			else
 				wildcardHandlers = directHandlers
 			end
 		end
-		if handlers then
-			table.move(wildcardHandlers, 1, #wildcardHandlers, #handlers + 1, handlers)
-		else
-			handlers = wildcardHandlers
+		if wildcardHandlers then
+			if handlers then
+				table.move(wildcardHandlers, 1, #wildcardHandlers, #handlers + 1, handlers)
+			else
+				handlers = wildcardHandlers
+			end
 		end
 	end
 

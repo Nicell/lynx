@@ -1,17 +1,21 @@
 local net = require("@lune/net")
 local Context = require("@lynx/context")
 type Context = Context.Context
+local Types = require("@lynx/types")
+type Middleware = Types.Middleware
 
 type ValidationTarget = "json" | "query" | "params" | "headers"
 type ValidationFunction = (value: any) -> (boolean, string?)
 
-local function validator(target: ValidationTarget | ValidationFunction, validation: ValidationFunction?)
+local function validator(target: ValidationTarget | ValidationFunction, validation: ValidationFunction?): Middleware
   if type(target) == "function" then
     validation = target
     target = "json"
   end
-  local targ: ValidationTarget = target :: ValidationTarget
-  local func: ValidationFunction = validation :: ValidationFunction
+  local targ = target
+  local func = validation
+  assert(type(func) == "function", "Validation function must be provided")
+
   return function(c: Context, next: () -> ()): net.ServeResponse?
     local value
     if targ == "json" then
@@ -31,12 +35,13 @@ local function validator(target: ValidationTarget | ValidationFunction, validati
     local valid, err = func(value)
 
     if not valid then
-      return c:status(400):text(err :: string)
+      return c:status(400):text(err or "Invalid request")
     end
 
     c.req.valid[targ] = value
 
-    return next()
+    next()
+    return nil -- TODO: How can we allow returning nothing?
   end
 end
 

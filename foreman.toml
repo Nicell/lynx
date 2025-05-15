@@ -1,4 +1,4 @@
 [tools]
-lune = { source = "filiptibell/lune", version = "0.8.6" }
-stylua = { source = "JohnnyMorganz/StyLua", version = "0.20.0" }
-selene = { source = "Kampfkarren/selene", version = "0.27.1" }
+lune = { source = "lune-org/lune", version = "0.9.3" }
+stylua = { source = "JohnnyMorganz/StyLua", version = "2.1.0" }
+selene = { source = "Kampfkarren/selene", version = "0.28.0" }

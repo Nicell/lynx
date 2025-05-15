@@ -1,5 +1,5 @@
 local fs = require("@lune/fs")
-local Context = require("context")
+local Context = require("./context")
 type Context = Context.Context
 
 -- From https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types

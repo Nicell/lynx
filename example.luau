@@ -9,6 +9,7 @@ app:use(function(c, next)
 	next()
 	local time = os.clock() - start
 	c:header("X-Response-Time", tostring(time))
+	return nil -- TODO: How can we allow returning nothing?
 end)
 
 -- Send text response with a parameter and query string

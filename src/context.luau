@@ -1,31 +1,35 @@
 local net = require("@lune/net")
+local serde = require("@lune/serde")
+
 local Context = {}
 Context.__index = Context
 
-export type LynxRequest =
-	net.ServeRequest
-	& { params: { [string]: string }, valid: { [string]: any }, json: (self: LynxRequest) -> any }
-export type Context = typeof(setmetatable(
-	{} :: {
-		req: LynxRequest,
-		res: net.ServeResponse,
-		state: { [string]: any },
-		notFoundHandler: (c: Context) -> net.ServeResponse,
-		finalized: boolean,
-	},
-	Context
-))
+export type LynxRequest = net.ServeRequest & {
+	params: { [string]: string },
+	valid: { [string]: any },
+	json: (self: LynxRequest) -> any,
+}
+
+type ContextData = {
+	req: LynxRequest,
+	res: net.ServeResponse,
+	state: { [string]: any },
+	notFoundHandler: (c: Context) -> net.ServeResponse,
+	finalized: boolean,
+}
+
+export type Context = typeof(setmetatable({} :: ContextData, Context))
 
 function Context.new(req: LynxRequest, notFoundHandler): Context
-	local self = setmetatable({}, Context)
+	local self = {}
 	self.req = req
 	self.res = {
 		headers = {},
-	}
+	} :: net.ServeResponse
 	self.state = {}
 	self.notFoundHandler = notFoundHandler
 	self.finalized = false
-	return self
+	return setmetatable(self, Context)
 end
 
 function Context.finalize(self: Context)
@@ -42,7 +46,8 @@ function Context.get(self: Context, key: string): any
 	return self.state[key]
 end
 
-function Context.header(self: Context, key: string, value: string)
+function Context.header(self: Context, key: string, value: string?)
+	assert(self.res.headers, "Response headers not initialized")
 	self.res.headers[key] = value
 	return self
 end
@@ -57,6 +62,7 @@ function Context.body(self: Context, body: buffer | string, status: number?, hea
 	self.res.status = status or self.res.status or 200
 
 	if headers then
+		assert(self.res.headers, "Response headers not initialized")
 		for k, v in headers do
 			self.res.headers[k] = v
 		end
@@ -72,7 +78,7 @@ end
 
 function Context.json(self: Context, json: any, status: number?, headers: any?): net.ServeResponse
 	self:header("Content-Type", "application/json")
-	local body = net.jsonEncode(json)
+	local body = serde.encode("json", json)
 
 	return self:body(body, status, headers)
 end

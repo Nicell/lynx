@@ -1,1 +1,1 @@
-return require("lynx")
+return require("@self/lynx")

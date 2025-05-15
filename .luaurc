@@ -1,6 +1,7 @@
 {
   "languageMode": "strict",
   "aliases": {
-    "lynx": "./src"
+    "lynx": "./src",
+    "lune": "~/.lune/.typedefs/0.9.3/"
   }
 }
