@@ -1,20 +1,19 @@
-local Node = require("node")
+local Node = require("./node")
 type Node = Node.Node
 
 local Router = {}
 Router.__index = Router
 
-export type Router = typeof(setmetatable(
-	{} :: {
-		node: Node,
-	},
-	Router
-))
+type RouterData = {
+	node: Node,
+}
+
+export type Router = setmetatable<RouterData, typeof(Router)>
 
 function Router.new(): Router
-	local self = setmetatable({}, Router)
+	local self = {}
 	self.node = Node.new()
-	return self
+	return setmetatable(self, Router)
 end
 
 function Router.add(self: Router, method: string, path: string, handler: (...any) -> ...any)

@@ -1,7 +1,7 @@
 local net = require("@lune/net")
-local Router = require("router")
-local Context = require("context")
-local static = require("static")
+local Router = require("./router")
+local Context = require("./context")
+local static = require("./static")
 
 type Router = Router.Router
 type Context = Context.Context
@@ -44,12 +44,12 @@ local defaultErrorHandler: ErrorHandler = function(c: Context, error: string): n
 end
 
 function Lynx.new(): Lynx
-	local self = setmetatable({}, Lynx)
+	local self = {}
 	self.router = Router.new()
 	self.routes = {}
 	self.notFoundHandler = defaultNotFound
 	self.errorHandler = defaultErrorHandler
-	return self
+	return setmetatable(self, Lynx)
 end
 
 function Lynx.route(self: Lynx, path: string, app: Lynx)
@@ -134,13 +134,19 @@ function RequestJson(self: LynxRequest)
 end
 
 function Lynx.dispatch(self: Lynx, req: net.ServeRequest): net.ServeResponse
-	local match: MatchResponse = Router.match(self.router, req.method, req.path)
+	local match: MatchResponse? = Router.match(self.router, req.method, req.path)
 
 	-- Set up LynxRequest. This should probably be a class eventually
-	local lynxReq: LynxRequest = req :: LynxRequest
-	lynxReq.params = {}
-	lynxReq.valid = {}
-	lynxReq.json = RequestJson
+	local lynxReq: LynxRequest = {
+		path = req.path,
+		query = req.query,
+		method = req.method,
+		headers = req.headers,
+		body = req.body,
+		params = {},
+		valid = {},
+		json = RequestJson,
+	}
 	local context = Context.new(lynxReq, self.notFoundHandler)
 
 	if not match then
