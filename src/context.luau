@@ -1,4 +1,5 @@
 local net = require("@lune/net")
+local serde = require("@lune/serde")
 
 local Context = {}
 Context.__index = Context
@@ -77,7 +78,7 @@ end
 
 function Context.json(self: Context, json: any, status: number?, headers: any?): net.ServeResponse
 	self:header("Content-Type", "application/json")
-	local body = net.jsonEncode(json)
+	local body = serde.encode("json", json)
 
 	return self:body(body, status, headers)
 end

@@ -1,4 +1,5 @@
 local net = require("@lune/net")
+local serde = require("@lune/serde")
 local Router = require("./router")
 local Context = require("./context")
 local static = require("./static")
@@ -133,7 +134,7 @@ function Lynx.onError(self: Lynx, handler: ErrorHandler)
 end
 
 function RequestJson(self: LynxRequest)
-	return net.jsonDecode(self.body)
+	return serde.decode("json", self.body)
 end
 
 function Lynx.dispatch(self: Lynx, req: net.ServeRequest): net.ServeResponse
