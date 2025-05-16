@@ -47,22 +47,12 @@ To make importing Lynx easier, you can add a `.luaurc` require alias to your pro
 }
 ```
 
-If you're using the [Luau LSP](https://github.com/JohnnyMorganz/luau-lsp) VSCode extension, add this  `directoryAlias` to your VSCode workspace's `settings.json`:
-
-```json
-// .vscode/settings.json
-{
-  "luau-lsp.require.directoryAliases": {
-    "@lynx": "lynx/src/"
-  }
-}
-```
-This should give you inline autocompletion, inline documentation, and type-hinting support in your editor.
+It's recommended to use the [Luau LSP](https://github.com/JohnnyMorganz/luau-lsp) VSCode extension. This should give you inline autocompletion, inline documentation, and type-hinting support in your editor.
 
 #### If you encounter "invalid require" TypeErrors or other issues when trying to require Lynx, try:
 - closing and re-opening your `.luau` files,
 - making sure you've opened the current folder as a VSCode workspace,
-- checking your `.luaurc` and `directoryAliases` for syntax, spelling, invalid whitespaces and/or missing trailing slashes (sometimes can cause platform-specific issues),
+- checking your `.luaurc` for syntax, spelling, invalid whitespaces and/or missing trailing slashes (sometimes can cause platform-specific issues),
 - and restarting the Luau LSP extension. 
 
 ### Using Lynx in your project
