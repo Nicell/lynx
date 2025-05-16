@@ -20,21 +20,25 @@ app:get("/hello/:name", function(c)
 end)
 
 -- Validate JSON request body
-app:post("/validate", validator(function(value)
-	if type(value) ~= "table" then
-		return false, "Expected JSON object"
+app:post(
+	"/validate",
+	validator(function(value)
+		if type(value) ~= "table" then
+			return false, "Expected JSON object"
+		end
+		if not value.name then
+			return false, "Missing 'name' field"
+		end
+		if not value.age then
+			return false, "Missing 'age' field"
+		end
+		return true
+	end),
+	function(c)
+		local json = c.req.valid.json
+		return c:text(`Hello, {json.name}! You are {json.age} years old.`)
 	end
-	if not value.name then
-		return false, "Missing 'name' field"
-	end
-	if not value.age then
-		return false, "Missing 'age' field"
-	end
-	return true
-end), function(c)
-	local json = c.req.valid.json
-	return c:text(`Hello, {json.name}! You are {json.age} years old.`)
-end)
+)
 
 -- Send JSON response
 app:get("/json", function(c)

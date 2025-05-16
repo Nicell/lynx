@@ -115,7 +115,13 @@ function Node.getHandlers(self: Node, method: string, params: { [string]: string
 	return handlers
 end
 
-function Node.search(self: Node, method: string, parts: { string }, depth: number, params: { [string]: string }?): MatchResponse?
+function Node.search(
+	self: Node,
+	method: string,
+	parts: { string },
+	depth: number,
+	params: { [string]: string }?
+): MatchResponse?
 	local p = parts[depth]
 
 	if not p then
