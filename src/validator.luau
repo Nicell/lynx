@@ -41,7 +41,7 @@ local function validator(target: ValidationTarget | ValidationFunction, validati
     c.req.valid[targ] = value
 
     next()
-    return nil
+    return nil -- TODO: How can we allow returning nothing?
   end
 end
 

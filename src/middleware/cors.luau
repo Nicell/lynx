@@ -1,6 +1,8 @@
 local net = require("@lune/net")
 local Context = require("../context")
 type Context = Context.Context
+local Types = require("@lynx/types")
+type Middleware = Types.Middleware
 
 export type Options = {
   origin: string | {string} | (origin: string) -> string?,
@@ -16,7 +18,7 @@ local defaultOptions: Options = {
   methods = {"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"},
 }
 
-local function cors(options: Options?)
+local function cors(options: Options?): Middleware
   local opts = table.clone(options or defaultOptions)
   if options then
     opts.origin = options.origin or defaultOptions.origin
@@ -40,7 +42,7 @@ local function cors(options: Options?)
     getOrigin = opts.origin
   end
 
-  return function(c: Context, next: () -> nil): net.ServeResponse?
+  return function(c: Context, next: () -> ()): net.ServeResponse?
     local origin = c.req.headers["origin"]
     c:header("Access-Control-Allow-Origin", getOrigin(origin or ""))
 
@@ -69,7 +71,8 @@ local function cors(options: Options?)
 
       return c:status(204):finalize()
     end
-    return next()
+    next()
+		return nil -- TODO: How can we allow returning nothing?
   end
 end
 

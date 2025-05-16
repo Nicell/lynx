@@ -2,6 +2,8 @@ local datetime = require("@lune/datetime")
 local process = require("@lune/process")
 local Context = require("../context")
 type Context = Context.Context
+local Types = require("@lynx/types")
+type Middleware = Types.Middleware
 
 local color = if process.env.NO_COLOR then false else true
 
@@ -48,4 +50,4 @@ local function logger(func: (string) -> ()?)
 	end
 end
 
-return logger
+return logger :: Middleware
