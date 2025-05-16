@@ -12,7 +12,7 @@ type RouterData = {
 	node: Node,
 }
 
-export type Router = setmetatable<RouterData, typeof(Router)>
+export type Router = typeof(setmetatable({} :: RouterData, Router))
 
 function Router.new(): Router
 	local self = {}

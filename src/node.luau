@@ -16,7 +16,7 @@ type NodeData = {
 	wildcard: Node?,
 }
 
-export type Node = setmetatable<NodeData, typeof(Node)>
+export type Node = typeof(setmetatable({} :: NodeData, Node))
 
 function Node.new(): Node
 	local self = {}

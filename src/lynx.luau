@@ -26,7 +26,7 @@ type LynxData = {
 	server: net.ServeHandle?,
 }
 
-export type Lynx = setmetatable<LynxData, typeof(Lynx)>
+export type Lynx = typeof(setmetatable({} :: LynxData, Lynx))
 
 export type LynxConfig = {
 	port: number?,

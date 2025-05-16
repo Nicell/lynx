@@ -18,7 +18,7 @@ type ContextData = {
 	finalized: boolean,
 }
 
-export type Context = setmetatable<ContextData, typeof(Context)>
+export type Context = typeof(setmetatable({} :: ContextData, Context))
 
 function Context.new(req: LynxRequest, notFoundHandler): Context
 	local self = {}
