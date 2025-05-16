@@ -10,9 +10,11 @@ local function validator(target: ValidationTarget | ValidationFunction, validati
     validation = target
     target = "json"
   end
-  local targ: ValidationTarget = target :: ValidationTarget
-  local func: ValidationFunction = validation :: ValidationFunction
-  return function(c: Context, next: () -> ()): net.ServeResponse?
+  local targ = target
+  local func = validation
+  assert(type(func) == "function", "Validation function must be provided")
+
+  return function(c: Context, next: () -> nil): net.ServeResponse?
     local value
     if targ == "json" then
       local success, json = pcall(c.req.json, c.req)
@@ -31,7 +33,7 @@ local function validator(target: ValidationTarget | ValidationFunction, validati
     local valid, err = func(value)
 
     if not valid then
-      return c:status(400):text(err :: string)
+      return c:status(400):text(err or "Invalid request")
     end
 
     c.req.valid[targ] = value

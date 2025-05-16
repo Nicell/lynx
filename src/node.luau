@@ -1,8 +1,14 @@
+local Types = require("./types")
+
 local Node = {}
 Node.__index = Node
 
+type MatchResponse = Types.MatchResponse
+type Handler = Types.Handler
+type Middleware = Types.Middleware
+
 type NodeData = {
-	methods: { [string]: { { handler: (...any) -> ...any, score: number } } },
+	methods: { [string]: { { handler: Handler | Middleware, score: number } } },
 	children: { [string]: Node },
 	order: number,
 	name: string,
@@ -23,7 +29,7 @@ function Node.new(): Node
 	return setmetatable(self, Node)
 end
 
-function Node.insert(self: Node, method: string, path: string, handler: (...any) -> ...any)
+function Node.insert(self: Node, method: string, path: string, handler: Handler | Middleware)
 	local currentNode = self
 	local parts = path:split("/")
 	self.order += 1
@@ -109,14 +115,14 @@ function Node.getHandlers(self: Node, method: string, params: { [string]: string
 	return handlers
 end
 
-function Node.search(self: Node, method: string, parts: { string }, depth: number, params: { [string]: string }?)
+function Node.search(self: Node, method: string, parts: { string }, depth: number, params: { [string]: string }?): MatchResponse?
 	local p = parts[depth]
 
 	if not p then
 		return Node.getHandlers(self, method, params)
 	end
 
-	local handlers = nil
+	local handlers: MatchResponse? = nil
 
 	if self.children[p] then
 		handlers = Node.search(self.children[p], method, parts, depth + 1, params)
@@ -126,10 +132,12 @@ function Node.search(self: Node, method: string, parts: { string }, depth: numbe
 		local newParams: { [string]: string } = if params then table.clone(params) else {}
 		newParams[param] = p
 		local paramHandlers = Node.search(node, method, parts, depth + 1, newParams)
-		if handlers then
-			table.move(paramHandlers, 1, #paramHandlers, #handlers + 1, handlers)
-		else
-			handlers = paramHandlers
+		if paramHandlers then
+			if handlers then
+				table.move(paramHandlers, 1, #paramHandlers, #handlers + 1, handlers)
+			else
+				handlers = paramHandlers
+			end
 		end
 	end
 
@@ -143,10 +151,12 @@ function Node.search(self: Node, method: string, parts: { string }, depth: numbe
 				wildcardHandlers = directHandlers
 			end
 		end
-		if handlers then
-			table.move(wildcardHandlers, 1, #wildcardHandlers, #handlers + 1, handlers)
-		else
-			handlers = wildcardHandlers
+		if wildcardHandlers then
+			if handlers then
+				table.move(wildcardHandlers, 1, #wildcardHandlers, #handlers + 1, handlers)
+			else
+				handlers = wildcardHandlers
+			end
 		end
 	end
 

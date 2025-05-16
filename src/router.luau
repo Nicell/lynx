@@ -1,6 +1,10 @@
 local Node = require("./node")
 type Node = Node.Node
 
+local Types = require("./types")
+type Handler = Types.Handler
+type Middleware = Types.Middleware
+
 local Router = {}
 Router.__index = Router
 
@@ -16,7 +20,7 @@ function Router.new(): Router
 	return setmetatable(self, Router)
 end
 
-function Router.add(self: Router, method: string, path: string, handler: (...any) -> ...any)
+function Router.add(self: Router, method: string, path: string, handler: Handler | Middleware)
 	self.node:insert(method, path, handler)
 end
 

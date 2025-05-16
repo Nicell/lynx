@@ -2,31 +2,31 @@ local net = require("@lune/net")
 local Router = require("./router")
 local Context = require("./context")
 local static = require("./static")
+local Types = require("./types")
 
 type Router = Router.Router
-type Context = Context.Context
-type LynxRequest = Context.LynxRequest
-export type Handler = (c: Context) -> net.ServeResponse
-export type ErrorHandler = (c: Context, error: string) -> net.ServeResponse
-export type Middleware = (c: Context, next: () -> ()) -> ()
-export type MatchResponse = { { params: { [string]: string }?, handler: Handler | Middleware, score: number } }
+export type Context = Context.Context
+export type LynxRequest = Context.LynxRequest
+export type Handler = Types.Handler
+export type ErrorHandler = Types.ErrorHandler
+export type Middleware = Types.Middleware
+export type MatchResponse = Types.MatchResponse
 
--- Luau unions are rough, so we need to define a mixed handler type instead of using Handler | Middleware
-type MixedHandler = (c: Context, next: () -> ()) -> () | net.ServeResponse
+type MixedHandler = Handler | Middleware
 
 local Lynx = {}
 Lynx.__index = Lynx
 
-export type Lynx = typeof(setmetatable(
-	{} :: {
-		router: Router,
-		routes: { { method: string, path: string, handler: Handler | Middleware } },
-		notFoundHandler: Handler,
-		errorHandler: ErrorHandler,
-		server: net.ServeHandle?,
-	},
-	Lynx
-))
+type LynxData = {
+	router: Router,
+	routes: { { method: string, path: string, handler: Handler | Middleware } },
+	notFoundHandler: Handler,
+	errorHandler: ErrorHandler,
+	server: net.ServeHandle?,
+}
+
+export type Lynx = setmetatable<LynxData, typeof(Lynx)>
+
 export type LynxConfig = {
 	port: number?,
 	address: string?,
@@ -49,6 +49,7 @@ function Lynx.new(): Lynx
 	self.routes = {}
 	self.notFoundHandler = defaultNotFound
 	self.errorHandler = defaultErrorHandler
+	self.server = nil :: net.ServeHandle?
 	return setmetatable(self, Lynx)
 end
 
@@ -59,7 +60,7 @@ function Lynx.route(self: Lynx, path: string, app: Lynx)
 	return self
 end
 
-function Lynx.addRoute(self: Lynx, method: string, path: string, handler: Handler | Middleware | MixedHandler)
+function Lynx.addRoute(self: Lynx, method: string, path: string, handler: MixedHandler)
 	method = method:upper()
 	self.router:add(method, path, handler)
 	table.insert(self.routes, { method = method, path = path, handler = handler })
@@ -76,9 +77,11 @@ function Lynx.use(self: Lynx, path: string | Middleware, handler: Middleware?, .
 		realPath = "*"
 	end
 
-	self.router:add("ALL", realPath :: string, handler :: Middleware)
+	assert(typeof(realPath) == "string", "Path must be a string")
+	assert(typeof(handler) == "function", "Handler must be a function")
+	self.router:add("ALL", realPath, handler)
 	for _, h in { ... } do
-		self.router:add("ALL", realPath :: string, h)
+		self.router:add("ALL", realPath, h)
 	end
 	return self
 end
@@ -124,7 +127,7 @@ function Lynx.notFound(self: Lynx, handler: Handler)
 	return self
 end
 
-function Lynx.onError(self: Lynx, handler: Handler)
+function Lynx.onError(self: Lynx, handler: ErrorHandler)
 	self.errorHandler = handler
 	return self
 end
@@ -163,7 +166,7 @@ function Lynx.dispatch(self: Lynx, req: net.ServeRequest): net.ServeResponse
 		if success then
 			return result or context.res
 		else
-			return self.errorHandler(context, (result :: unknown) :: string)
+			return self.errorHandler(context, result)
 		end
 	end
 
@@ -176,7 +179,7 @@ function Lynx.dispatch(self: Lynx, req: net.ServeRequest): net.ServeResponse
 
 		local handler = match[i].handler
 
-		return handler(context, function()
+		return (handler :: Middleware)(context, function()
 			dispatch(i + 1)
 		end)
 	end
@@ -184,22 +187,25 @@ function Lynx.dispatch(self: Lynx, req: net.ServeRequest): net.ServeResponse
 	local success, result = pcall(dispatch, 1)
 
 	if not success then
-		return self.errorHandler(context, (result :: unknown) :: string)
+		return self.errorHandler(context, result)
 	elseif context.finalized then
 		return context.res
 	else
-		return self.notFoundHandler(context)
+		return self.notFoundHandler(context :: Context)
 	end
 end
 
 function Lynx.request(self: Lynx, request: string | net.ServeRequest): net.ServeResponse
-	if type(request) == "string" then
-		request = {
+	if typeof(request) == "string" then
+		return self:dispatch({
 			method = "GET",
 			path = request,
-		} :: net.ServeRequest
+			body = "",
+			headers = {},
+			query = {},
+		})
 	end
-	return self:dispatch(request :: net.ServeRequest)
+	return self:dispatch(request)
 end
 
 function Lynx.serve(self: Lynx, config: LynxConfig?)
