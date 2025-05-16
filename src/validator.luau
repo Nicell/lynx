@@ -1,11 +1,13 @@
 local net = require("@lune/net")
 local Context = require("@lynx/context")
 type Context = Context.Context
+local Types = require("@lynx/types")
+type Middleware = Types.Middleware
 
 type ValidationTarget = "json" | "query" | "params" | "headers"
 type ValidationFunction = (value: any) -> (boolean, string?)
 
-local function validator(target: ValidationTarget | ValidationFunction, validation: ValidationFunction?)
+local function validator(target: ValidationTarget | ValidationFunction, validation: ValidationFunction?): Middleware
   if type(target) == "function" then
     validation = target
     target = "json"
@@ -14,7 +16,7 @@ local function validator(target: ValidationTarget | ValidationFunction, validati
   local func = validation
   assert(type(func) == "function", "Validation function must be provided")
 
-  return function(c: Context, next: () -> nil): net.ServeResponse?
+  return function(c: Context, next: () -> ()): net.ServeResponse?
     local value
     if targ == "json" then
       local success, json = pcall(c.req.json, c.req)
@@ -38,7 +40,8 @@ local function validator(target: ValidationTarget | ValidationFunction, validati
 
     c.req.valid[targ] = value
 
-    return next()
+    next()
+    return nil
   end
 end
 

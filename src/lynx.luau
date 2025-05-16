@@ -13,7 +13,8 @@ export type ErrorHandler = Types.ErrorHandler
 export type Middleware = Types.Middleware
 export type MatchResponse = Types.MatchResponse
 
-type MixedHandler = Handler | Middleware
+-- TODO: Use Handler | Middleware when new solver works with it
+type MixedHandler = Middleware
 
 local Lynx = {}
 Lynx.__index = Lynx
@@ -61,7 +62,7 @@ function Lynx.route(self: Lynx, path: string, app: Lynx)
 	return self
 end
 
-function Lynx.addRoute(self: Lynx, method: string, path: string, handler: MixedHandler)
+function Lynx.addRoute(self: Lynx, method: string, path: string, handler: Handler | Middleware)
 	method = method:upper()
 	self.router:add(method, path, handler)
 	table.insert(self.routes, { method = method, path = path, handler = handler })

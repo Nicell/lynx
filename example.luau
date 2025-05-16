@@ -4,7 +4,7 @@ local validator = require("@lynx/validator")
 local app = Lynx.new()
 
 -- Middleware to calculate and attach response time
-app:use(function(c, next)
+app:use(function(c, next): ()
 	local start = os.clock()
 	next()
 	local time = os.clock() - start
