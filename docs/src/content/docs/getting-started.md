@@ -42,7 +42,8 @@ To make importing Lynx easier, you can add a `.luaurc` require alias to your pro
 // .luaurc
 {
   "aliases": {
-    "lynx": "lynx/src/"
+    "lynx": "lynx/src/",
+    "lune": "~/.lune/.typedefs/0.9.3/"
   }
 }
 ```
