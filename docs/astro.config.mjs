@@ -3,7 +3,7 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://lynx.land',
+	site: 'https://lynx.luau.page',
 	prefetch: true,
 	integrations: [
 		starlight({
