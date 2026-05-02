@@ -1,21 +1,31 @@
+--!native
 -- Implementation of this benchmark: https://hono.dev/docs/concepts/benchmarks
 
+local process = require("@lute/process")
 local Router = require("@lynx/router")
 
-local router = Router.new()
+local includeInit = table.find(process.args, "--init") ~= nil
 
-router:add("GET", "/user", function() end)
-router:add("GET", "/user/comments", function() end)
-router:add("GET", "/user/avatar", function() end)
-router:add("GET", "/user/lookup/username/:username", function() end)
-router:add("GET", "/user/lookup/email/:address", function() end)
-router:add("GET", "/event/:id", function() end)
-router:add("GET", "/event/:id/comments", function() end)
-router:add("POST", "/event/:id/comment", function() end)
-router:add("GET", "/map/:location/events", function() end)
-router:add("GET", "/status", function() end)
-router:add("GET", "/very/deeply/nested/route/hello/there", function() end)
-router:add("GET", "/static/*", function() end)
+local function buildRouter()
+	local router = Router.new()
+
+	router:add("GET", "/user", function() end)
+	router:add("GET", "/user/comments", function() end)
+	router:add("GET", "/user/avatar", function() end)
+	router:add("GET", "/user/lookup/username/:username", function() end)
+	router:add("GET", "/user/lookup/email/:address", function() end)
+	router:add("GET", "/event/:id", function() end)
+	router:add("GET", "/event/:id/comments", function() end)
+	router:add("POST", "/event/:id/comment", function() end)
+	router:add("GET", "/map/:location/events", function() end)
+	router:add("GET", "/status", function() end)
+	router:add("GET", "/very/deeply/nested/route/hello/there", function() end)
+	router:add("GET", "/static/*", function() end)
+
+	return router
+end
+
+local router = buildRouter()
 
 local routes = {
 	{
@@ -55,13 +65,17 @@ local routes = {
 	},
 }
 
-local ITERATIONS = 1000000
+local ITERATIONS = if includeInit then 100000 else 1000000
 
 for _, route in routes do
 	local total = 0
 	for _ = 1, ITERATIONS do
 		local start = os.clock()
-		Router.match(router, route.method, route.path)
+		if includeInit then
+			Router.match(buildRouter(), route.method, route.path)
+		else
+			Router.match(router, route.method, route.path)
+		end
 		local finish = os.clock()
 		total += finish - start
 	end
@@ -75,11 +89,21 @@ end
 local totalTogether = 0
 
 for _ = 1, ITERATIONS do
-	for _, route in routes do
+	if includeInit then
 		local start = os.clock()
-		Router.match(router, route.method, route.path)
+		local r = buildRouter()
+		for _, route in routes do
+			Router.match(r, route.method, route.path)
+		end
 		local finish = os.clock()
 		totalTogether += finish - start
+	else
+		for _, route in routes do
+			local start = os.clock()
+			Router.match(router, route.method, route.path)
+			local finish = os.clock()
+			totalTogether += finish - start
+		end
 	end
 end
 

@@ -1,3 +1,4 @@
+--!native
 local Types = require("./types")
 
 local Node = {}

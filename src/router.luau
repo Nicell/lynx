@@ -1,3 +1,4 @@
+--!native
 local Node = require("./node")
 type Node = Node.Node
 
