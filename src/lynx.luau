@@ -45,6 +45,17 @@ local defaultErrorHandler: ErrorHandler = function(c: Context, error: string): n
 	return c:text("Internal Server Error")
 end
 
+local function mergePath(base: string, sub: string): string
+	local prefix = if base:sub(1, 1) == "/" then base else "/" .. base
+	if sub == "/" then
+		return prefix
+	end
+
+	local separator = if prefix:sub(-1) == "/" then "" else "/"
+	local child = if sub:sub(1, 1) == "/" then sub:sub(2) else sub
+	return `{prefix}{separator}{child}`
+end
+
 function Lynx.new(): Lynx
 	local self = {}
 	self.router = Router.new()
@@ -57,7 +68,7 @@ end
 
 function Lynx.route(self: Lynx, path: string, app: Lynx)
 	for _, route in app.routes do
-		self:addRoute(route.method, path .. route.path, route.handler)
+		self:addRoute(route.method, mergePath(path, route.path), route.handler)
 	end
 	return self
 end
@@ -81,9 +92,9 @@ function Lynx.use(self: Lynx, path: string | Middleware, handler: Middleware?, .
 
 	assert(typeof(realPath) == "string", "Path must be a string")
 	assert(typeof(handler) == "function", "Handler must be a function")
-	self.router:add("ALL", realPath, handler)
+	self:addRoute("ALL", realPath, handler)
 	for _, h in { ... } do
-		self.router:add("ALL", realPath, h)
+		self:addRoute("ALL", realPath, h)
 	end
 	return self
 end
