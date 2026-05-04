@@ -6,21 +6,25 @@ local Router = require("@lynx/router")
 
 local includeInit = table.find(process.args, "--init") ~= nil
 
+local noop = function()
+	return nil
+end
+
 local function buildRouter()
 	local router = Router.new()
 
-	router:add("GET", "/user", function() end)
-	router:add("GET", "/user/comments", function() end)
-	router:add("GET", "/user/avatar", function() end)
-	router:add("GET", "/user/lookup/username/:username", function() end)
-	router:add("GET", "/user/lookup/email/:address", function() end)
-	router:add("GET", "/event/:id", function() end)
-	router:add("GET", "/event/:id/comments", function() end)
-	router:add("POST", "/event/:id/comment", function() end)
-	router:add("GET", "/map/:location/events", function() end)
-	router:add("GET", "/status", function() end)
-	router:add("GET", "/very/deeply/nested/route/hello/there", function() end)
-	router:add("GET", "/static/*", function() end)
+	router:add("GET", "/user", noop)
+	router:add("GET", "/user/comments", noop)
+	router:add("GET", "/user/avatar", noop)
+	router:add("GET", "/user/lookup/username/:username", noop)
+	router:add("GET", "/user/lookup/email/:address", noop)
+	router:add("GET", "/event/:id", noop)
+	router:add("GET", "/event/:id/comments", noop)
+	router:add("POST", "/event/:id/comment", noop)
+	router:add("GET", "/map/:location/events", noop)
+	router:add("GET", "/status", noop)
+	router:add("GET", "/very/deeply/nested/route/hello/there", noop)
+	router:add("GET", "/static/*", noop)
 
 	return router
 end
