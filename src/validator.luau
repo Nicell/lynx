@@ -1,4 +1,4 @@
-local net = require("@lune/net")
+local Runtime = require("@lynx/runtime")
 local Context = require("@lynx/context")
 type Context = Context.Context
 local Types = require("@lynx/types")
@@ -16,7 +16,7 @@ local function validator(target: ValidationTarget | ValidationFunction, validati
 	local func = validation
 	assert(type(func) == "function", "Validation function must be provided")
 
-	return function(c: Context, next: () -> ()): net.ServeResponse?
+	return function(c: Context, next: () -> ()): Runtime.ServeResponse?
 		local value
 		if targ == "json" then
 			local success, json = pcall(c.req.json, c.req)
@@ -38,7 +38,7 @@ local function validator(target: ValidationTarget | ValidationFunction, validati
 			return c:status(400):text(err or "Invalid request")
 		end
 
-		c.req.valid[targ] = value
+		c.req.valid[targ :: ValidationTarget] = value
 
 		next()
 		return nil -- TODO: How can we allow returning nothing?

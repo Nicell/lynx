@@ -1,5 +1,4 @@
-local net = require("@lune/net")
-local serde = require("@lune/serde")
+local Runtime = require("./runtime")
 local Router = require("./router")
 local Context = require("./context")
 local static = require("./static")
@@ -24,7 +23,7 @@ type LynxData = {
 	routes: { { method: string, path: string, handler: Handler | Middleware } },
 	notFoundHandler: Handler,
 	errorHandler: ErrorHandler,
-	server: net.ServeHandle?,
+	server: Runtime.ServeHandle?,
 }
 
 export type Lynx = typeof(setmetatable({} :: LynxData, Lynx))
@@ -34,12 +33,12 @@ export type LynxConfig = {
 	address: string?,
 }
 
-local defaultNotFound: Handler = function(c: Context): net.ServeResponse
+local defaultNotFound: Handler = function(c: Context): Runtime.ServeResponse
 	c:status(404)
 	return c:text("Not Found")
 end
 
-local defaultErrorHandler: ErrorHandler = function(c: Context, error: string): net.ServeResponse
+local defaultErrorHandler: ErrorHandler = function(c: Context, error: string): Runtime.ServeResponse
 	print("Error:", error)
 	c:status(500)
 	return c:text("Internal Server Error")
@@ -62,7 +61,7 @@ function Lynx.new(): Lynx
 	self.routes = {}
 	self.notFoundHandler = defaultNotFound
 	self.errorHandler = defaultErrorHandler
-	self.server = nil :: net.ServeHandle?
+	self.server = nil :: Runtime.ServeHandle?
 	return setmetatable(self, Lynx)
 end
 
@@ -146,10 +145,10 @@ function Lynx.onError(self: Lynx, handler: ErrorHandler)
 end
 
 function RequestJson(self: LynxRequest)
-	return serde.decode("json", self.body)
+	return Runtime.jsonDecode(self.body)
 end
 
-function Lynx.dispatch(self: Lynx, req: net.ServeRequest): net.ServeResponse
+function Lynx.dispatch(self: Lynx, req: Runtime.ServeRequest): Runtime.ServeResponse
 	local match: MatchResponse? = Router.match(self.router, req.method, req.path)
 
 	-- Set up LynxRequest. This should probably be a class eventually
@@ -172,18 +171,18 @@ function Lynx.dispatch(self: Lynx, req: net.ServeRequest): net.ServeResponse
 	if #match == 1 then
 		local handler = match[1].handler
 		context.req.params = match[1].params or {}
-		local success, result = pcall(handler, context, function()
+		local success, result = pcall(handler :: any, context, function()
 			return self.notFoundHandler(context) -- If the single handler is a middleware, it must be not found
 		end)
 
 		if success then
-			return result or context.res
+			return (result :: Runtime.ServeResponse?) or context.res
 		else
-			return self.errorHandler(context, result)
+			return self.errorHandler(context, tostring(result))
 		end
 	end
 
-	local function dispatch(i): net.ServeResponse?
+	local function dispatch(i): Runtime.ServeResponse?
 		if i > #match then
 			return self.notFoundHandler(context)
 		end
@@ -200,7 +199,7 @@ function Lynx.dispatch(self: Lynx, req: net.ServeRequest): net.ServeResponse
 	local success, result = pcall(dispatch, 1)
 
 	if not success then
-		return self.errorHandler(context, result)
+		return self.errorHandler(context, tostring(result))
 	elseif context.finalized then
 		return context.res
 	else
@@ -208,7 +207,7 @@ function Lynx.dispatch(self: Lynx, req: net.ServeRequest): net.ServeResponse
 	end
 end
 
-function Lynx.request(self: Lynx, request: string | net.ServeRequest): net.ServeResponse
+function Lynx.request(self: Lynx, request: string | Runtime.ServeRequest): Runtime.ServeResponse
 	if typeof(request) == "string" then
 		return self:dispatch({
 			method = "GET",
@@ -223,12 +222,9 @@ end
 
 function Lynx.serve(self: Lynx, config: LynxConfig?)
 	local c: LynxConfig = config or {}
-	self.server = net.serve(c.port or 3000, {
-		address = c.address or "http://0.0.0.0",
-		handleRequest = function(req)
-			return Lynx.dispatch(self, req)
-		end,
-	})
+	self.server = Runtime.serve(c, function(req)
+		return Lynx.dispatch(self, req)
+	end)
 	return self
 end
 

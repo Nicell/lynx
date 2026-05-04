@@ -1,11 +1,10 @@
-local datetime = require("@lune/datetime")
-local process = require("@lune/process")
+local Runtime = require("../runtime")
 local Context = require("../context")
 type Context = Context.Context
 local Types = require("@lynx/types")
 type Middleware = Types.Middleware
 
-local color = if process.env.NO_COLOR then false else true
+local color = if Runtime.env.NO_COLOR then false else true
 
 local function dim(string: string): string
 	if not color then
@@ -37,7 +36,7 @@ local function logger(func: (string) -> ()?)
 	return function(c: Context, next: () -> ())
 		local start = os.clock()
 		next()
-		local time = datetime.now():formatLocalTime("%H:%M:%S")
+		local time = os.date("%H:%M:%S")
 		local status = c.res.status
 		local method = c.req.method
 		local path = c.req.path

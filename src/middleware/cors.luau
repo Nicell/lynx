@@ -1,4 +1,4 @@
-local net = require("@lune/net")
+local Runtime = require("@lynx/runtime")
 local Context = require("../context")
 type Context = Context.Context
 local Types = require("@lynx/types")
@@ -42,7 +42,7 @@ local function cors(options: Options?): Middleware
 		getOrigin = opts.origin
 	end
 
-	return function(c: Context, next: () -> ()): net.ServeResponse?
+	return function(c: Context, next: () -> ()): Runtime.ServeResponse?
 		local origin = c.req.headers["origin"]
 		c:header("Access-Control-Allow-Origin", getOrigin(origin or ""))
 

@@ -1,10 +1,9 @@
-local net = require("@lune/net")
-local serde = require("@lune/serde")
+local Runtime = require("./runtime")
 
 local Context = {}
 Context.__index = Context
 
-export type LynxRequest = net.ServeRequest & {
+export type LynxRequest = Runtime.ServeRequest & {
 	params: { [string]: string },
 	valid: { [string]: any },
 	json: (self: LynxRequest) -> any,
@@ -12,9 +11,9 @@ export type LynxRequest = net.ServeRequest & {
 
 type ContextData = {
 	req: LynxRequest,
-	res: net.ServeResponse,
+	res: Runtime.ServeResponse,
 	state: { [string]: any },
-	notFoundHandler: (c: Context) -> net.ServeResponse,
+	notFoundHandler: (c: Context) -> Runtime.ServeResponse,
 	finalized: boolean,
 }
 
@@ -25,7 +24,7 @@ function Context.new(req: LynxRequest, notFoundHandler): Context
 	self.req = req
 	self.res = {
 		headers = {},
-	} :: net.ServeResponse
+	} :: Runtime.ServeResponse
 	self.state = {}
 	self.notFoundHandler = notFoundHandler
 	self.finalized = false
@@ -57,7 +56,7 @@ function Context.status(self: Context, status: number)
 	return self
 end
 
-function Context.body(self: Context, body: buffer | string, status: number?, headers: any?): net.ServeResponse
+function Context.body(self: Context, body: buffer | string, status: number?, headers: any?): Runtime.ServeResponse
 	self.res.body = body
 	self.res.status = status or self.res.status or 200
 
@@ -71,24 +70,24 @@ function Context.body(self: Context, body: buffer | string, status: number?, hea
 	return self:finalize()
 end
 
-function Context.text(self: Context, text: string, status: number?, headers: any?): net.ServeResponse
+function Context.text(self: Context, text: string, status: number?, headers: any?): Runtime.ServeResponse
 	self:header("Content-Type", "text/plain; charset=utf-8")
 	return self:body(text, status, headers)
 end
 
-function Context.json(self: Context, json: any, status: number?, headers: any?): net.ServeResponse
+function Context.json(self: Context, json: any, status: number?, headers: any?): Runtime.ServeResponse
 	self:header("Content-Type", "application/json")
-	local body = serde.encode("json", json)
+	local body = Runtime.jsonEncode(json)
 
 	return self:body(body, status, headers)
 end
 
-function Context.html(self: Context, html: string, status: number?, headers: any?): net.ServeResponse
+function Context.html(self: Context, html: string, status: number?, headers: any?): Runtime.ServeResponse
 	self:header("Content-Type", "text/html; charset=utf-8")
 	return self:body(html, status, headers)
 end
 
-function Context.notFound(self: Context): net.ServeResponse
+function Context.notFound(self: Context): Runtime.ServeResponse
 	return self.notFoundHandler(self)
 end
 

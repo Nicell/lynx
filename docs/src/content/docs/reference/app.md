@@ -127,7 +127,7 @@ end)
 
 ### `:request`
 
-`:request(request: string | net.ServeRequest)`
+`:request(request: string | ServeRequest)`
 
 Send a request to the application and return the response. This can be useful for testing your application.
 
@@ -135,7 +135,7 @@ Send a request to the application and return the response. This can be useful fo
 local response = app:request("/hello")
 ```
 
-Alternatively, you can pass a `net.ServeRequest` object.
+Alternatively, you can pass a serve request table.
 
 ```luau
 local response = app:request({
