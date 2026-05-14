@@ -12,8 +12,7 @@ export type ErrorHandler = Types.ErrorHandler
 export type Middleware = Types.Middleware
 export type MatchResponse = Types.MatchResponse
 
--- TODO: Use Handler | Middleware when new solver works with it
-type MixedHandler = Middleware
+type MixedHandler = Handler | Middleware
 
 local Lynx = {}
 Lynx.__index = Lynx
@@ -26,7 +25,7 @@ type LynxData = {
 	server: Runtime.ServeHandle?,
 }
 
-export type Lynx = typeof(setmetatable({} :: LynxData, Lynx))
+export type Lynx = setmetatable<LynxData, typeof(Lynx)>
 
 export type LynxConfig = {
 	port: number?,

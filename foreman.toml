@@ -1,5 +1,5 @@
 [tools]
 lune = { source = "lune-org/lune", version = "0.10.1" }
-lute = { source = "luau-lang/lute", version = "1.0.1-nightly.20260501" }
+lute = { source = "luau-lang/lute", version = "1.0.1-nightly.20260514" }
 stylua = { source = "JohnnyMorganz/StyLua", version = "2.1.0" }
 selene = { source = "Kampfkarren/selene", version = "0.28.0" }

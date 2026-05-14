@@ -9,6 +9,7 @@ app:use(function(c, next)
 	next()
 	local time = os.clock() - start
 	c:header("X-Response-Time", tostring(time))
+	return nil
 end)
 
 -- Send text response with a parameter and query string
@@ -31,9 +32,9 @@ app:post(
 		if not value.age then
 			return false, "Missing 'age' field"
 		end
-		return true
+		return true, ""
 	end),
-	function(c)
+	function(c: Lynx.Context)
 		local json = c.req.valid.json
 		return c:text(`Hello, {json.name}! You are {json.age} years old.`)
 	end
