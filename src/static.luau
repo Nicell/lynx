@@ -1,9 +1,9 @@
-local fs = require("@lune/fs")
+local Runtime = require("./runtime")
 local Context = require("./context")
 type Context = Context.Context
 
 -- From https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
-local mimeTypes = {
+local mimeTypes: { [string]: string } = {
 	aac = "audio/aac",
 	abw = "application/x-abiword",
 	apng = "image/apng",
@@ -102,11 +102,11 @@ local function static(path: string, directory: string)
 		local fullPath = c.req.path
 		local relativePath = fullPath:sub(#cleanPath + 1)
 		local filePath = directory .. relativePath
-		local success, result = pcall(fs.readFile, filePath)
+		local success, result = pcall(Runtime.readFile, filePath)
 
 		if not success then
 			local indexFilePath = filePath:gsub("/$", "") .. "/index.html"
-			local indexSuccess, indexResult = pcall(fs.readFile, indexFilePath)
+			local indexSuccess, indexResult = pcall(Runtime.readFile, indexFilePath)
 			if indexSuccess then
 				c:header("Content-Type", getMimeType(indexFilePath))
 				return c:body(indexResult)

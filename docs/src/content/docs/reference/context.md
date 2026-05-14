@@ -11,7 +11,7 @@ The `Context` object is passed to route handlers and middleware functions. It co
 
 ### `req`
 
-The request object. Contains information about the incoming request. This table extends the [Lune ServeRequest](https://lune-org.github.io/docs/api-reference/net#serverequest) with the following:
+The request object. Contains information about the incoming request. This table extends the current runtime's serve request with the following:
 
 - `params`: `{ [string]: string }`
   - Path parameters extracted from the route path.
@@ -30,7 +30,7 @@ end)
 
 ### `res`
 
-The response object. Contains information about the response to be sent. This table is an instance of the [Lune ServeResponse](https://lune-org.github.io/docs/api-reference/net#serveresponse).
+The response object. Contains information about the response to be sent. This table is compatible with the current runtime's serve response.
 
 :::warning
 Avoid modifying the response object directly. Use the `Context` methods instead.

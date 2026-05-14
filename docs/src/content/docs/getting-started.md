@@ -3,7 +3,7 @@ title: Getting Started
 description: Get started with the Lynx Web Framework.
 ---
 
-Lynx is a fast and simple web framework for [Lune](https://github.com/lune-org/lune), a general purpose runtime for the [Luau programming language](https://luau.org). Lynx is inspired by [Hono](https://hono.dev/) and shares a similar API.
+Lynx is a fast and simple web framework for [Lute](https://lute.luau.org/) and [Lune](https://github.com/lune-org/lune), general purpose runtimes for the [Luau programming language](https://luau.org). Lynx is inspired by [Hono](https://hono.dev/) and shares a similar API.
 
 ## Basic usage
 
@@ -36,7 +36,7 @@ git submodule update --remote
 
 ### Editor setup and require aliases
 
-To make importing Lynx easier, you can add a `.luaurc` require alias to your project:
+To make importing Lynx easier, you can add a `.luaurc` require alias to your project. Lute projects can also run `lute setup --with-luaurc` to add runtime aliases for editor tooling.
 
 ```json
 // .luaurc

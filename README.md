@@ -2,7 +2,7 @@
 
 [**Documentation ⚡️ lynx.luau.page**](https://lynx.luau.page)
 
-Lynx is a simple and fast Luau web framework for Lune. Lynx is inspired by [Hono](https://github.com/honojs/hono) and shares a similar API.
+Lynx is a simple and fast Luau web framework for Lute and Lune. Lynx is inspired by [Hono](https://github.com/honojs/hono) and shares a similar API.
 
 ```luau
 local app = Lynx.new()

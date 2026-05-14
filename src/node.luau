@@ -72,7 +72,7 @@ function Node.insert(self: Node, method: string, path: string, handler: Handler 
 	currentNode.name = path
 end
 
-function Node.getHandlers(self: Node, method: string, params: { [string]: string }?)
+function Node.getHandlers(self: Node, method: string, params: { [string]: string }?): MatchResponse
 	local handlers = {}
 
 	if self.methods[method] then

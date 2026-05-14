@@ -5,6 +5,7 @@ type Node = Node.Node
 local Types = require("./types")
 type Handler = Types.Handler
 type Middleware = Types.Middleware
+type MatchResponse = Types.MatchResponse
 
 local Router = {}
 Router.__index = Router
@@ -25,13 +26,13 @@ function Router.add(self: Router, method: string, path: string, handler: Handler
 	self.node:insert(method, path, handler)
 end
 
-function Router.match(self: Router, method: string, path: string)
+function Router.match(self: Router, method: string, path: string): MatchResponse?
 	local parts = string.split(string.sub(path, 2), "/")
 
 	local handlers = Node.search(self.node, method, parts, 1)
 
 	if handlers then
-		table.sort(handlers, function(a, b)
+		table.sort(handlers, function(a: typeof(handlers[1]), b: typeof(handlers[1]))
 			return a.score < b.score
 		end)
 	end
